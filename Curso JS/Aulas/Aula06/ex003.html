@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primeiro Codigo</title>
+    <style>
+        body{
+            background-color: brown;
+            font-family: Arial, Helvetica, sans-serif; 
+                       
+        }
+        h1{
+            color: aqua;
+        }
+        p{
+            color: aliceblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Olá, mundo!</h1>
+    <p>Me livrei da maldade</p>
+    <script>       
+        var n1 = Number.parseFloat(window.prompt('digite um numero:')) //string-Pode excluir parseInt e o parseFloat e deixar so "Number"
+        var n2 = Number.parseFloat(window.prompt('digite outro numero:')) //string
+        var s = n1 + n2
+        window.alert(`A soma entre ${n1} e ${n2} = ${s}`)//templatstring `` ${}
+        //window.alert('A soma dos valores é =' + s)// (number+number) adição ou (string+string) concatenação
+    </script>
+</body>
+</html>

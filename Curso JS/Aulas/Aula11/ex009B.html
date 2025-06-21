@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>País que Vive</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        input, button {
+            padding: 8px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        #resultado {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Descubra se você é Brasileiro</h1>
+    <label for="pais">Digite seu país:</label><br>
+    <input type="text" id="pais" placeholder="Ex: Brasil"><br>
+    <button onclick="verificarPais()">Verificar</button>
+    <div id="resultado"></div>
+
+    <script>
+        function verificarPais() {
+            const pais = document.getElementById('pais').value.trim();//pode usar var/const
+            const resultado = document.getElementById('resultado');//pode usar var/const
+
+            if (pais.toLowerCase() === 'brasil') {
+                resultado.textContent = `Vivendo no ${pais} — Você é Brasileiro 🇧🇷`;
+            } else {
+                resultado.textContent = `Vivendo no ${pais} — Você é Estrangeiro 🌍`;
+            }
+        }
+    </script>
+</body>
+</html>
