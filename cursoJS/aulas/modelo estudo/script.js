@@ -9,4 +9,4 @@ if ( solteiro === false) {
     console.log( `${nome} esta casado!`);
     }
 
-//pag 25
+//pag 28
