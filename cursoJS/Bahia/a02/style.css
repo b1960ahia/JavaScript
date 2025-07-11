@@ -1,0 +1,33 @@
+*{
+    padding: 0px;
+    margin: opx;    
+}
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: lightgray;
+    height: 100vh;
+   
+    
+}
+.container{
+    background-color: aquamarine;
+    text-align: center;
+    border-radius: 10px;
+    padding: 20px;  
+    box-shadow: 2px 2px 8px rgb(41, 28, 28); 
+    width: 80vw;     
+}
+.saudacao{
+    font-size: 1.3em;
+    margin-top: 10px;
+}
+button{
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+    padding: 5px;
+    background-color: rgb(119, 92, 144);
+}
