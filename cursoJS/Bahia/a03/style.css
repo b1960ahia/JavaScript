@@ -19,7 +19,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 600px;
-    border: 2px solid #8B7D70;
+    border: 5px solid #8B7D70;
 }
 h1 {
     color: #331F19;
@@ -36,11 +36,11 @@ button {
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
-    transition: background-color 0.3s ease;
+    /*transition: background-color 0.3s ease;*/
     margin-top: 10px;
 }
 button:hover {
-    background-color: #A34743;
+    background-color: #1a1919;
 }
 ul {
     list-style: none;
@@ -48,19 +48,19 @@ ul {
     margin-top: 20px;
 }
 ul li {
-    background-color: #F4F0EA;
+    background-color: #b9955f;
     color: #331F19;
     padding: 10px;
     margin: 5px 0;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(175, 111, 111, 0.1);
 }
 
 /* Estilo para o campo de entrada */
 input[type="text"] {
     padding: 10px;
     width: 80%;
-    max-width: 500px;
+    max-width: 400px;
     margin-top: 10px;
     margin-bottom: 10px;
     border: 2px solid #8B7D70;
