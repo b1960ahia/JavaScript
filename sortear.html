@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteador de Jogos de Loteria</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    .form-group {
+      margin: 10px 0;
+    }
+    input {
+      padding: 6px;
+      margin: 0 4px;
+      width: 120px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .resultado {
+      margin-top: 20px;
+      text-align: left;
+      display: inline-block;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    .jogo {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+    .numero {
+      display: inline-block;
+      background: #e3e3e3;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sorteador de Jogos de Loteria</h1>
+
+  <div class="form-group">
+    <label>Quantos jogos:</label>
+    <input type="number" id="quant" value="5">
+  </div>
+
+  <div class="form-group">
+    <label>Quantos números por jogo:</label>
+    <input type="number" id="qtdNumeros" value="6">
+  </div>
+
+  <div class="form-group">
+    <label>Intervalo:</label>
+    <input type="number" id="inicio" value="1"> até
+    <input type="number" id="fim" value="60">
+  </div>
+
+  <div class="form-group">
+    <label>Números a excluir (sep. vírgula):</label><br>
+    <input type="text" id="excluir" placeholder="Ex: 2,5,8">
+  </div>
+
+  <div class="form-group">
+    <label>Números fixos em todos os jogos (sep. vírgula):</label><br>
+    <input type="text" id="fixos" placeholder="Ex: 10,20">
+  </div>
+
+  <button onclick="sortear()">Sortear Jogos</button>
+
+  <div class="resultado" id="resultado"></div>
+
+  <script>
+    function sortear() {
+      const quant = parseInt(document.getElementById('quant').value);
+      const qtdNumeros = parseInt(document.getElementById('qtdNumeros').value);
+      const inicio = parseInt(document.getElementById('inicio').value);
+      const fim = parseInt(document.getElementById('fim').value);
+
+      const excluir = document.getElementById('excluir').value
+        .split(',')
+        .map(n => parseInt(n.trim()))
+        .filter(n => !isNaN(n));
+
+      const fixos = document.getElementById('fixos').value
+        .split(',')
+        .map(n => parseInt(n.trim()))
+        .filter(n => !isNaN(n));
+
+      // lista de números disponíveis
+      let disponiveis = [];
+      for (let n = inicio; n <= fim; n++) {
+        if (!excluir.includes(n) && !fixos.includes(n)) {
+          disponiveis.push(n);
+        }
+      }
+
+      const resultadoDiv = document.getElementById('resultado');
+      resultadoDiv.innerHTML = '';
+
+      if (disponiveis.length + fixos.length < qtdNumeros) {
+        resultadoDiv.innerHTML = '<p style="color:red;">⚠️ Não há números suficientes disponíveis para sortear!</p>';
+        return;
+      }
+
+      for (let j = 0; j < quant; j++) {
+        const faltam = qtdNumeros - fixos.length;
+        if (faltam < 0) {
+          resultadoDiv.innerHTML = '<p style="color:red;">⚠️ Quantidade de números fixos maior que o tamanho do jogo!</p>';
+          return;
+        }
+
+        // copia lista disponiveis para não alterar original
+        let disp = [...disponiveis];
+        let sorteados = [];
+
+        // sorteia faltam números sem repetir
+        for (let i = 0; i < faltam; i++) {
+          const idx = Math.floor(Math.random() * disp.length);
+          sorteados.push(disp[idx]);
+          disp.splice(idx, 1);
+        }
+
+        const jogo = [...fixos, ...sorteados].sort((a, b) => a - b);
+
+        // monta HTML do jogo
+        let numerosHtml = jogo.map(n => `<span class="numero">${n}</span>`).join('');
+        resultadoDiv.innerHTML += `<div class="jogo"><strong>Jogo ${j + 1}:</strong> ${numerosHtml}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
