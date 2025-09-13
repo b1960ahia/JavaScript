@@ -29,6 +29,7 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      margin: 5px;
     }
     button:hover {
       background-color: #45a049;
@@ -41,6 +42,7 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      min-width: 250px;
     }
     .jogo {
       margin: 5px 0;
@@ -49,10 +51,16 @@
     }
     .numero {
       display: inline-block;
-      background: #e3e3e3;
       padding: 4px 8px;
       margin: 2px;
       border-radius: 4px;
+      color: #000;
+    }
+    .numero-fixo {
+      background: #a8e6a1; /* verde para fixos */
+    }
+    .numero-sorteado {
+      background: #e3e3e3; /* cinza para sorteados */
     }
   </style>
 </head>
@@ -86,10 +94,13 @@
   </div>
 
   <button onclick="sortear()">Sortear Jogos</button>
+  <button onclick="copiar()">Copiar Jogos</button>
 
   <div class="resultado" id="resultado"></div>
 
   <script>
+    let ultimosJogos = [];
+
     function sortear() {
       const quant = parseInt(document.getElementById('quant').value);
       const qtdNumeros = parseInt(document.getElementById('qtdNumeros').value);
@@ -116,6 +127,7 @@
 
       const resultadoDiv = document.getElementById('resultado');
       resultadoDiv.innerHTML = '';
+      ultimosJogos = [];
 
       if (disponiveis.length + fixos.length < qtdNumeros) {
         resultadoDiv.innerHTML = '<p style="color:red;">⚠️ Não há números suficientes disponíveis para sortear!</p>';
@@ -141,11 +153,32 @@
         }
 
         const jogo = [...fixos, ...sorteados].sort((a, b) => a - b);
+        ultimosJogos.push(jogo);
 
-        // monta HTML do jogo
-        let numerosHtml = jogo.map(n => `<span class="numero">${n}</span>`).join('');
+        // monta HTML do jogo com cores diferentes
+        let numerosHtml = jogo.map(n => {
+          if (fixos.includes(n)) {
+            return `<span class="numero numero-fixo">${n}</span>`;
+          } else {
+            return `<span class="numero numero-sorteado">${n}</span>`;
+          }
+        }).join('');
         resultadoDiv.innerHTML += `<div class="jogo"><strong>Jogo ${j + 1}:</strong> ${numerosHtml}</div>`;
       }
+    }
+
+    function copiar() {
+      if (ultimosJogos.length === 0) {
+        alert('Nenhum jogo para copiar. Sorteie primeiro.');
+        return;
+      }
+      let texto = '';
+      ultimosJogos.forEach((jogo, i) => {
+        texto += `Jogo ${i + 1}: ${jogo.join(', ')}\n`;
+      });
+      navigator.clipboard.writeText(texto).then(() => {
+        alert('Jogos copiados para a área de transferência!');
+      });
     }
   </script>
 </body>
