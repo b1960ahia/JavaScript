@@ -1,0 +1,57 @@
+ body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    .form-group {
+      margin: 10px 0;
+    }
+    input {
+      padding: 6px;
+      margin: 0 4px;
+      width: 120px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .resultado {
+      margin-top: 20px;
+      text-align: left;
+      display: inline-block;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      min-width: 250px;
+    }
+    .jogo {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+    .numero {
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 4px;
+      color: #000;
+    }
+    .numero-fixo {
+      background: #a8e6a1; /* verde para fixos */
+    }
+    .numero-sorteado {
+      background: #e3e3e3; /* cinza para sorteados */
+    }
