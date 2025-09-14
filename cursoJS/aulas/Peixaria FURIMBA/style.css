@@ -1,0 +1,69 @@
+ body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #87CEFA, #00BFFF);
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #fff;
+      background: #006994;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffffdd;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    th, td {
+      border-bottom: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #f0f8ff;
+    }
+    select, input, button {
+      padding: 8px;
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+    }
+    button {
+      background-color: #006994;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0099cc;
+    }
+    .resultado {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+      color: #006994;
+    }
+    #carrinho {
+      margin-top: 20px;
+      border-top: 2px solid #ccc;
+      padding-top: 10px;
+    }
+    #carrinho ul {
+      list-style: none;
+      padding: 0;
+    }
+    #carrinho li {
+      margin: 5px 0;
+    }
