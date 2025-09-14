@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedra, Papel e Tesoura</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Pedra, Papel e Tesoura</h1>
+        
+        <div class="placar">
+            <div class="jogador">Jogador: <span id="vitorias-jogador">0</span></div>
+            <div>Empates: <span id="empates">0</span></div>
+            <div class="computador">Computador: <span id="vitorias-computador">0</span></div>
+        </div>
+        
+        <div class="opcoes">
+            <div class="opcao" data-jogada="0">✊</div>
+            <div class="opcao" data-jogada="1">✋</div>
+            <div class="opcao" data-jogada="2">✌️</div>
+        </div>
+        
+        <button id="jogar" disabled>Jogar!</button>
+        
+        <div class="resultado">
+            <div class="jogadas">
+                <div class="jogada">
+                    <span id="jogada-jogador">?</span>
+                    <div>Jogador</div>
+                </div>
+                <div class="jogada">
+                    <span id="jogada-computador">?</span>
+                    <div>Computador</div>
+                </div>
+            </div>
+            
+            <div id="mensagem">Escolha uma opção para começar!</div>
+        </div>
+        
+        <div class="historico">
+            <h3>Histórico</h3>
+            <div id="historico-partidas"></div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos do DOM
+        const opcoes = document.querySelectorAll('.opcao');
+        const btnJogar = document.getElementById('jogar');
+        const jogadaJogadorEl = document.getElementById('jogada-jogador');
+        const jogadaComputadorEl = document.getElementById('jogada-computador');
+        const mensagemEl = document.getElementById('mensagem');
+        const vitoriasJogadorEl = document.getElementById('vitorias-jogador');
+        const vitoriasComputadorEl = document.getElementById('vitorias-computador');
+        const empatesEl = document.getElementById('empates');
+        const historicoPartidasEl = document.getElementById('historico-partidas');
+        
+        // Variáveis do jogo
+        let jogadaJogador = null;
+        let vitoriasJogador = 0;
+        let vitoriasComputador = 0;
+        let empates = 0;
+        const itens = ['Pedra', 'Papel', 'Tesoura'];
+        const emojis = ['✊', '✋', '✌️'];
+        
+        // Event Listeners
+        opcoes.forEach(opcao => {
+            opcao.addEventListener('click', () => {
+                // Remover seleção anterior
+                opcoes.forEach(o => o.classList.remove('selecionada'));
+                
+                // Selecionar nova opção
+                opcao.classList.add('selecionada');
+                jogadaJogador = parseInt(opcao.dataset.jogada);
+                
+                // Habilitar botão de jogar
+                btnJogar.disabled = false;
+                
+                // Mostrar prévia da jogada
+                jogadaJogadorEl.textContent = emojis[jogadaJogador];
+                jogadaComputadorEl.textContent = '?';
+                mensagemEl.textContent = 'Pronto para jogar!';
+                mensagemEl.className = '';
+            });
+        });
+        
+        btnJogar.addEventListener('click', jogar);
+        
+        // Função principal do jogo
+        function jogar() {
+            // Desabilitar botão durante a jogada
+            btnJogar.disabled = true;
+            
+            // Gerar jogada do computador
+            const jogadaComputador = Math.floor(Math.random() * 3);
+            
+            // Animação de contagem regressiva
+            let count = 0;
+            const interval = setInterval(() => {
+                jogadaComputadorEl.textContent = emojis[count % 3];
+                count++;
+                
+                if (count > 5) {
+                    clearInterval(interval);
+                    
+                    // Mostrar jogada final do computador
+                    jogadaComputadorEl.textContent = emojis[jogadaComputador];
+                    jogadaComputadorEl.classList.add('animacao');
+                    
+                    // Determinar o vencedor
+                    determinarVencedor(jogadaJogador, jogadaComputador);
+                }
+            }, 200);
+        }
+        
+        function determinarVencedor(jogador, computador) {
+            let mensagem = '';
+            let classe = '';
+            
+            if (jogador === computador) {
+                mensagem = 'EMPATE!';
+                classe = 'empate';
+                empates++;
+                empatesEl.textContent = empates;
+            } else if (
+                (jogador === 0 && computador === 2) ||
+                (jogador === 1 && computador === 0) ||
+                (jogador === 2 && computador === 1)
+            ) {
+                mensagem = 'JOGADOR VENCEU!';
+                classe = 'vitoria';
+                vitoriasJogador++;
+                vitoriasJogadorEl.textContent = vitoriasJogador;
+            } else {
+                mensagem = 'COMPUTADOR VENCEU!';
+                classe = 'derrota';
+                vitoriasComputador++;
+                vitoriasComputadorEl.textContent = vitoriasComputador;
+            }
+            
+            // Atualizar mensagem
+            mensagemEl.textContent = mensagem;
+            mensagemEl.className = classe;
+            mensagemEl.classList.add('animacao');
+            
+            // Adicionar ao histórico
+            adicionarAoHistorico(jogador, computador, mensagem);
+        }
+        
+        function adicionarAoHistorico(jogador, computador, resultado) {
+            const historicoEntry = document.createElement('p');
+            historicoEntry.textContent = `Jogador: ${itens[jogador]} | Computador: ${itens[computador]} | ${resultado}`;
+            historicoPartidasEl.prepend(historicoEntry);
+            
+            // Manter apenas as 10 últimas entradas
+            if (historicoPartidasEl.children.length > 10) {
+                historicoPartidasEl.removeChild(historicoPartidasEl.lastChild);
+            }
+        }
+        
+        // Remover classes de animação após a animação terminar
+        const elementosAnimados = [jogadaJogadorEl, jogadaComputadorEl, mensagemEl];
+        elementosAnimados.forEach(el => {
+            el.addEventListener('animationend', () => {
+                el.classList.remove('animacao');
+            });
+        });
+    </script>
+</body>
+</html>

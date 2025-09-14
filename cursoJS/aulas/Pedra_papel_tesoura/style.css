@@ -1,0 +1,191 @@
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .placar {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .placar div {
+            padding: 10px;
+        }
+        
+        .jogador, .computador {
+            font-weight: bold;
+        }
+        
+        .jogador {
+            color: #1a75ff;
+        }
+        
+        .computador {
+            color: #ff3333;
+        }
+        
+        .opcoes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .opcao {
+            background-color: #fff;
+            border: 3px solid #ddd;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .opcao:hover {
+            transform: scale(1.1);
+            border-color: #6c757d;
+        }
+        
+        .opcao.selecionada {
+            border-color: #007bff;
+            background-color: #e6f2ff;
+        }
+        
+        #jogar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #jogar:hover {
+            background-color: #218838;
+        }
+        
+        #jogar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .resultado {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .jogadas {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .jogada {
+            text-align: center;
+        }
+        
+        .jogada span {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        #mensagem {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .vitoria {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .derrota {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .empate {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .animacao {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .historico {
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .historico h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .historico p {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
