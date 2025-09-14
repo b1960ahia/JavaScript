@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Pescado do Furimba</title>
+</head>
+<body>
+<script>
+// Dados iniciais dos pescados
+const pescados = {
+  "Salmao": { preco_por_quilo: 50.00, peso: 3.15 },
+  "Tilapia": { preco_por_quilo: 30.00, peso: 1.5 },
+  "Bacalhau": { preco_por_quilo: 80.00, peso: 1.0 },
+  "Dourado": { preco_por_quilo: 45.00, peso: 2.5 },
+  "Sardinha": { preco_por_quilo: 20.00, peso: 2.55 },
+  "Tainha": { preco_por_quilo: 22.00, peso: 2.55 },
+};
+
+// Função para mostrar os pescados disponíveis
+function mostrarPescados() {
+  let lista = "Pescados disponíveis (Preço/kg | Estoque):\n";
+  for (const nome in pescados) {
+    lista += `- ${nome}: R$${pescados[nome].preco_por_quilo.toFixed(2)}/kg | ${pescados[nome].peso.toFixed(2)} kg em estoque\n`;
+  }
+  alert(lista);
+}
+
+// Loop de compras
+alert("🦞🐟 PESCADO DO FURIMBA - Pitimbu-PB 🦑🐠");
+while (true) {
+  mostrarPescados();
+  let nome = prompt("Digite o nome do pescado desejado (ou 'sair' para encerrar):");
+  if (!nome) break; // usuário cancelou
+  nome = nome.trim();
+  if (nome.toLowerCase() === "sair") break;
+
+  // Normalizar para primeira letra maiúscula (Salmao, Tilapia etc.)
+  nome = nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
+
+  if (pescados[nome]) {
+    const estoque = pescados[nome].peso;
+    let peso = prompt(`Digite o peso em kg para ${nome} (estoque: ${estoque.toFixed(2)} kg):`);
+    if (!peso) continue;
+    peso = parseFloat(peso);
+    if (isNaN(peso) || peso <= 0) {
+      alert("Peso inválido.");
+      continue;
+    }
+    if (peso > estoque) {
+      alert(`Desculpe, temos apenas ${estoque.toFixed(2)} kg de ${nome} em estoque.`);
+      continue;
+    }
+
+    const precoTotal = pescados[nome].preco_por_quilo * peso;
+    pescados[nome].peso -= peso; // Atualiza estoque
+    alert(`O preço total do ${nome} com ${peso.toFixed(2)} kg é: R$${precoTotal.toFixed(2)}\nEstoque restante: ${pescados[nome].peso.toFixed(2)} kg`);
+  } else {
+    alert(`O pescado ${nome} não está no sistema.`);
+  }
+}
+
+alert("Obrigado pela preferência! Volte sempre 🦞🐟");
+</script>
+</body>
+</html>
