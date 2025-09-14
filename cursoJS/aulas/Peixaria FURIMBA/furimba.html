@@ -3,63 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <title>Pescado do Furimba</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #87CEFA, #00BFFF);
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #fff;
+      background: #006994;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffffdd;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    th, td {
+      border-bottom: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f8ff;
+    }
+    select, input, button {
+      padding: 8px;
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+    }
+    button {
+      background-color: #006994;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0099cc;
+    }
+    .resultado {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+      color: #006994;
+    }
+  </style>
 </head>
 <body>
-<script>
-// Dados iniciais dos pescados
-const pescados = {
-  "Salmao": { preco_por_quilo: 50.00, peso: 3.15 },
-  "Tilapia": { preco_por_quilo: 30.00, peso: 1.5 },
-  "Bacalhau": { preco_por_quilo: 80.00, peso: 1.0 },
-  "Dourado": { preco_por_quilo: 45.00, peso: 2.5 },
-  "Sardinha": { preco_por_quilo: 20.00, peso: 2.55 },
-  "Tainha": { preco_por_quilo: 22.00, peso: 2.55 },
-};
+  <h1>🦞🐟 PESCADO DO FURIMBA - Pitimbu-PB 🦑🐠</h1>
+  <div class="container">
+    <table id="tabelaPescados">
+      <thead>
+        <tr>
+          <th>Pescado</th>
+          <th>Preço/kg (R$)</th>
+          <th>Estoque (kg)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-// Função para mostrar os pescados disponíveis
-function mostrarPescados() {
-  let lista = "Pescados disponíveis (Preço/kg | Estoque):\n";
-  for (const nome in pescados) {
-    lista += `- ${nome}: R$${pescados[nome].preco_por_quilo.toFixed(2)}/kg | ${pescados[nome].peso.toFixed(2)} kg em estoque\n`;
-  }
-  alert(lista);
-}
+    <label for="pescadoSelect">Escolha o pescado:</label>
+    <select id="pescadoSelect"></select>
 
-// Loop de compras
-alert("🦞🐟 PESCADO DO FURIMBA - Pitimbu-PB 🦑🐠");
-while (true) {
-  mostrarPescados();
-  let nome = prompt("Digite o nome do pescado desejado (ou 'sair' para encerrar):");
-  if (!nome) break; // usuário cancelou
-  nome = nome.trim();
-  if (nome.toLowerCase() === "sair") break;
+    <label for="pesoInput">Digite o peso em kg:</label>
+    <input type="number" id="pesoInput" step="0.01" min="0">
 
-  // Normalizar para primeira letra maiúscula (Salmao, Tilapia etc.)
-  nome = nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
+    <button onclick="comprar()">Comprar</button>
 
-  if (pescados[nome]) {
-    const estoque = pescados[nome].peso;
-    let peso = prompt(`Digite o peso em kg para ${nome} (estoque: ${estoque.toFixed(2)} kg):`);
-    if (!peso) continue;
-    peso = parseFloat(peso);
-    if (isNaN(peso) || peso <= 0) {
-      alert("Peso inválido.");
-      continue;
+    <div class="resultado" id="resultado"></div>
+  </div>
+
+  <script>
+    // Dados iniciais
+    const pescados = {
+      "Salmao": { preco_por_quilo: 50.00, peso: 3.15 },
+      "Tilapia": { preco_por_quilo: 30.00, peso: 1.5 },
+      "Bacalhau": { preco_por_quilo: 80.00, peso: 1.0 },
+      "Dourado": { preco_por_quilo: 45.00, peso: 2.5 },
+      "Sardinha": { preco_por_quilo: 20.00, peso: 2.55 },
+      "Tainha": { preco_por_quilo: 22.00, peso: 2.55 },
+    };
+
+    const tabelaBody = document.querySelector('#tabelaPescados tbody');
+    const select = document.getElementById('pescadoSelect');
+    const resultado = document.getElementById('resultado');
+
+    function atualizarTabela() {
+      tabelaBody.innerHTML = '';
+      select.innerHTML = '';
+      for (const nome in pescados) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${nome}</td>
+          <td>${pescados[nome].preco_por_quilo.toFixed(2)}</td>
+          <td>${pescados[nome].peso.toFixed(2)}</td>
+        `;
+        tabelaBody.appendChild(tr);
+
+        // Atualiza o select
+        const option = document.createElement('option');
+        option.value = nome;
+        option.textContent = nome;
+        select.appendChild(option);
+      }
     }
-    if (peso > estoque) {
-      alert(`Desculpe, temos apenas ${estoque.toFixed(2)} kg de ${nome} em estoque.`);
-      continue;
+
+    function comprar() {
+      const nome = select.value;
+      const peso = parseFloat(document.getElementById('pesoInput').value);
+      if (isNaN(peso) || peso <= 0) {
+        resultado.textContent = "Informe um peso válido.";
+        return;
+      }
+      if (peso > pescados[nome].peso) {
+        resultado.textContent = `Desculpe, temos apenas ${pescados[nome].peso.toFixed(2)} kg de ${nome} em estoque.`;
+        return;
+      }
+      const precoTotal = pescados[nome].preco_por_quilo * peso;
+      pescados[nome].peso -= peso;
+      atualizarTabela();
+      resultado.textContent = `O preço total do ${nome} com ${peso.toFixed(2)} kg é: R$${precoTotal.toFixed(2)}. Estoque restante: ${pescados[nome].peso.toFixed(2)} kg`;
+      document.getElementById('pesoInput').value = '';
     }
 
-    const precoTotal = pescados[nome].preco_por_quilo * peso;
-    pescados[nome].peso -= peso; // Atualiza estoque
-    alert(`O preço total do ${nome} com ${peso.toFixed(2)} kg é: R$${precoTotal.toFixed(2)}\nEstoque restante: ${pescados[nome].peso.toFixed(2)} kg`);
-  } else {
-    alert(`O pescado ${nome} não está no sistema.`);
-  }
-}
-
-alert("Obrigado pela preferência! Volte sempre 🦞🐟");
-</script>
+    // Inicializa
+    atualizarTabela();
+  </script>
 </body>
 </html>
