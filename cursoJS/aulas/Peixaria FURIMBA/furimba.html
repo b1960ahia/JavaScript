@@ -18,7 +18,7 @@
       border-radius: 10px;
     }
     .container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
       background: #ffffffdd;
       padding: 20px;
@@ -34,6 +34,7 @@
       border-bottom: 1px solid #ccc;
       padding: 8px;
       text-align: center;
+      vertical-align: middle;
     }
     th {
       background-color: #f0f8ff;
@@ -60,6 +61,18 @@
       text-align: center;
       color: #006994;
     }
+    #carrinho {
+      margin-top: 20px;
+      border-top: 2px solid #ccc;
+      padding-top: 10px;
+    }
+    #carrinho ul {
+      list-style: none;
+      padding: 0;
+    }
+    #carrinho li {
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
@@ -82,9 +95,15 @@
     <label for="pesoInput">Digite o peso em kg:</label>
     <input type="number" id="pesoInput" step="0.01" min="0">
 
-    <button onclick="comprar()">Comprar</button>
+    <button onclick="adicionarCarrinho()">Adicionar ao Carrinho</button>
+    <button onclick="finalizarCompra()">Finalizar Compra</button>
 
     <div class="resultado" id="resultado"></div>
+
+    <div id="carrinho">
+      <h3>Carrinho:</h3>
+      <ul id="listaCarrinho"></ul>
+    </div>
   </div>
 
   <script>
@@ -98,9 +117,12 @@
       "Tainha": { preco_por_quilo: 22.00, peso: 2.55 },
     };
 
+    const carrinho = []; // itens {nome, peso, precoUnit}
+
     const tabelaBody = document.querySelector('#tabelaPescados tbody');
     const select = document.getElementById('pescadoSelect');
     const resultado = document.getElementById('resultado');
+    const listaCarrinho = document.getElementById('listaCarrinho');
 
     function atualizarTabela() {
       tabelaBody.innerHTML = '';
@@ -114,7 +136,6 @@
         `;
         tabelaBody.appendChild(tr);
 
-        // Atualiza o select
         const option = document.createElement('option');
         option.value = nome;
         option.textContent = nome;
@@ -122,7 +143,16 @@
       }
     }
 
-    function comprar() {
+    function atualizarCarrinho() {
+      listaCarrinho.innerHTML = '';
+      carrinho.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${item.nome} - ${item.peso.toFixed(2)} kg (R$${item.precoUnit.toFixed(2)}/kg)`;
+        listaCarrinho.appendChild(li);
+      });
+    }
+
+    function adicionarCarrinho() {
       const nome = select.value;
       const peso = parseFloat(document.getElementById('pesoInput').value);
       if (isNaN(peso) || peso <= 0) {
@@ -133,11 +163,43 @@
         resultado.textContent = `Desculpe, temos apenas ${pescados[nome].peso.toFixed(2)} kg de ${nome} em estoque.`;
         return;
       }
-      const precoTotal = pescados[nome].preco_por_quilo * peso;
-      pescados[nome].peso -= peso;
-      atualizarTabela();
-      resultado.textContent = `O preço total do ${nome} com ${peso.toFixed(2)} kg é: R$${precoTotal.toFixed(2)}. Estoque restante: ${pescados[nome].peso.toFixed(2)} kg`;
+
+      // Adiciona no carrinho (não baixa estoque ainda)
+      carrinho.push({
+        nome: nome,
+        peso: peso,
+        precoUnit: pescados[nome].preco_por_quilo
+      });
+
+      atualizarCarrinho();
+      resultado.textContent = `Adicionado ao carrinho: ${nome} - ${peso.toFixed(2)} kg`;
       document.getElementById('pesoInput').value = '';
+    }
+
+    function finalizarCompra() {
+      if (carrinho.length === 0) {
+        resultado.textContent = "Carrinho vazio.";
+        return;
+      }
+
+      let total = 0;
+      let resumo = "Resumo da compra:\n";
+      carrinho.forEach(item => {
+        const precoItem = item.precoUnit * item.peso;
+        total += precoItem;
+        resumo += `${item.nome} - ${item.peso.toFixed(2)} kg = R$${precoItem.toFixed(2)}\n`;
+        // Atualiza estoque
+        pescados[item.nome].peso -= item.peso;
+      });
+
+      resumo += `Total: R$${total.toFixed(2)}`;
+      alert(resumo);
+
+      // Limpa carrinho
+      carrinho.length = 0;
+      atualizarCarrinho();
+      atualizarTabela();
+      resultado.textContent = "Compra finalizada!";
     }
 
     // Inicializa
