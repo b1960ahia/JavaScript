@@ -1,4 +1,4 @@
- * {
+  * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -88,6 +88,128 @@
         .opcao.selecionada {
             border-color: #007bff;
             background-color: #e6f2ff;
+        }
+        
+        #jogar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #jogar:hover {
+            background-color: #218838;
+        }
+        
+        #jogar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .resultado {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .jogadas {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .jogada {
+            text-align: center;
+        }
+        
+        .jogada span {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        #mensagem {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .vitoria {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .derrota {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .empate {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .animacao {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .historico {
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .historico h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .historico p {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .instrucoes {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            text-align: left;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instrucoes h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .instrucoes ul {
+            padding-left: 20px;
+        }
+        
+        .instrucoes li {
+            margin-bottom: 5px;
         }
         
         #jogar {
