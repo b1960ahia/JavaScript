@@ -21,8 +21,8 @@
         
         <div class="filters">
             <h3>Filtros:</h3>
-            <label>Concurso Inicial: <input type="number" id="concursoInicio" min="2800" max="3000" value="2800"></label>
-            <label>Concurso Final: <input type="number" id="concursoFim" min="2800" max="3000" value="2899"></label>
+            <label>Concurso Inicial: <input type="number" id="concursoInicio" min="2800" max="30000" value="2800"></label>
+            <label>Concurso Final: <input type="number" id="concursoFim" min="2800" max="30000" value="30000"></label>
             <button onclick="carregarDados()">Atualizar Dados</button>
             <button onclick="exportarDados()">📥 Exportar CSV</button>
         </div>
@@ -33,7 +33,7 @@
 
     <script>
         // Simulação de dados da Lotofácil 2025
-        function gerarDados2025() {
+        function apiguididevbrloteria() {
             const dados = [];
             let concurso = 2800;
             const dataInicio = new Date(2025, 0, 2); // 2 de janeiro de 2025
@@ -136,7 +136,7 @@
                 return;
             }
 
-            const todosDados = gerarDados2025();
+            const todosDados = apiguididevbrloteria();
             const dadosFiltrados = filtrarPorConcurso(todosDados, inicio, fim);
             const estatisticas = calcularEstatisticas(dadosFiltrados);
             
