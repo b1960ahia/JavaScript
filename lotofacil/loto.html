@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lotofácil Real - Análise com API</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      .filters { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+      .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
+      .stat-item { background: #e3f2fd; padding: 10px; text-align: center; border-radius: 5px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+      th { background: #2196f3; color: white; }
+      .dezenas { display: flex; gap: 2px; justify-content: center; }
+      .dezena { background: #2196f3; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+      canvas { margin-top: 30px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Lotofácil — Dados Oficiais</h1>
+    <div class="filters">
+      <label>Concurso Inicial: <input type="number" id="concursoInicio"></label>
+      <label>Concurso Final: <input type="number" id="concursoFim"></label>
+      <button onclick="carregarDados()">Atualizar</button>
+    </div>
+    <div id="estatisticas"></div>
+    <canvas id="graficoDezenas" height="120"></canvas>
+    <div id="tabelaResultados"></div>
+  </div>
+
+<script>
+  let chartGrafico = null;
+
+  async function fetchConcurso(numero) {
+    const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/${numero}`;
+    const resp = await fetch(url, {
+      headers: {
+        "Accept": "application/json, text/plain, */*",
+        "Origin": "https://loterias.caixa.gov.br",
+        "Referer": "https://loterias.caixa.gov.br/",
+      }
+    });
+    if (!resp.ok) {
+      throw new Error(`Erro ao buscar concurso ${numero}: ${resp.status}`);
+    }
+    const json = await resp.json();
+    return json;
+  }
+
+  async function fetchUltimoConcurso() {
+    const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil`;
+    const resp = await fetch(url, {
+      headers: {
+        "Accept": "application/json, text/plain, */*",
+        "Origin": "https://loterias.caixa.gov.br",
+        "Referer": "https://loterias.caixa.gov.br/",
+      }
+    });
+    if (!resp.ok) {
+      throw new Error(`Erro ao buscar último concurso: ${resp.status}`);
+    }
+    const json = await resp.json();
+    return json;
+  }
+
+  async function carregarDados() {
+    try {
+      const inicioInput = document.getElementById('concursoInicio').value;
+      const fimInput = document.getElementById('concursoFim').value;
+
+      let inicio = parseInt(inicioInput);
+      let fim = parseInt(fimInput);
+
+      // Se não informados, buscar valores padrão do último concurso
+      if (!inicio || !fim) {
+        const ultimo = await fetchUltimoConcurso();
+        const numUltimo = ultimo.numero;
+        fim = numUltimo;
+        inicio = numUltimo - 20;  // por exemplo, os últimos 20 concursos
+        document.getElementById('concursoFim').value = fim;
+        document.getElementById('concursoInicio').value = inicio;
+      }
+
+      if (inicio > fim) {
+        alert("Concurso inicial não pode ser maior que final.");
+        return;
+      }
+
+      const resultados = [];
+      for (let n = inicio; n <= fim; n++) {
+        try {
+          const dado = await fetchConcurso(n);
+          resultados.push(dado);
+        } catch (err) {
+          console.warn("Falha no concurso:", n, err);
+        }
+      }
+
+      // Filtrar resultados válidos
+      const sorteios = resultados.map(d => ({
+        concurso: d.numero,
+        data: d.dataApuracao,
+        dezenas: d.listaDezenas.sort((a,b) => a - b)
+      }));
+
+      const stats = calcularEstatisticas(sorteios);
+      exibirEstatisticas(stats);
+      exibirResultados(sorteios);
+      exibirGrafico(stats);
+
+    } catch (e) {
+      console.error("Erro ao carregar dados:", e);
+      alert("Não foi possível buscar os dados oficiais. Verifique console.");
+    }
+  }
+
+  function calcularEstatisticas(dados) {
+    const stats = Array(25).fill(0);
+    dados.forEach(s => {
+      s.dezenas.forEach(d => {
+        stats[d - 1]++;
+      });
+    });
+    return stats;
+  }
+
+  function exibirEstatisticas(stats) {
+    let html = `<h2>📈 Frequência das Dezenas</h2><div class="stats">`;
+    stats.forEach((c, i) => {
+      html += `
+        <div class="stat-item">
+          <div style="font-size:18px; font-weight:bold;">${i+1}</div>
+          <div>${c} vez${c !== 1 ? 'es' : ''}</div>
+        </div>`;
+    });
+    html += `</div>`;
+    document.getElementById('estatisticas').innerHTML = html;
+  }
+
+  function exibirResultados(sorteios) {
+    let html = `<h2>🎯 Resultados Oficiais</h2>
+      <table>
+        <tr><th>Concurso</th><th>Data</th><th>Dezenas</th></tr>`;
+    sorteios.forEach(s => {
+      html += `<tr>
+        <td>${s.concurso}</td>
+        <td>${s.data}</td>
+        <td>
+          <div class="dezenas">
+            ${s.dezenas.map(d => `<div class="dezena">${d}</div>`).join('')}
+          </div>
+        </td>
+      </tr>`;
+    });
+    html += `</table>`;
+    document.getElementById('tabelaResultados').innerHTML = html;
+  }
+
+  function exibirGrafico(stats) {
+    const ctx = document.getElementById('graficoDezenas').getContext('2d');
+    const labels = stats.map((_, i) => (i+1).toString().padStart(2, '0'));
+
+    if (chartGrafico) {
+      chartGrafico.destroy();
+    }
+
+    chartGrafico = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Frequência',
+          data: stats,
+          backgroundColor: '#2196f3'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Quantidade' }
+          },
+          x: {
+            title: { display: true, text: 'Dezena' }
+          }
+        }
+      }
+    });
+  }
+
+  // Ao abrir a página, já carregar dados
+  window.addEventListener('load', carregarDados);
+</script>
+</body>
+</html>
