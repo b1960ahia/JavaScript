@@ -9,11 +9,13 @@
     .filters { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
     .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px,1fr)); gap: 10px; margin: 20px 0; }
     .stat-item { background: #e3f2fd; padding: 10px; text-align: center; border-radius: 5px; font-size:12px; }
+    .stat-item-destaque { background: #ff9800 !important; color:#fff; font-weight:bold; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     th { background: #2196f3; color: white; }
     .dezenas { display: flex; flex-wrap:wrap; gap: 2px; justify-content: center; }
     .dezena { background: #2196f3; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .dezena-destaque { background: #ff9800 !important; color: #fff !important; font-weight: bold; }
     canvas { margin-top: 30px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -25,6 +27,10 @@
     <label>Concurso Inicial: <input type="number" id="lfInicio"></label>
     <label>Concurso Final: <input type="number" id="lfFim"></label>
     <button onclick="carregar('lotofacil')">Atualizar</button>
+    <label style="margin-left:20px;">Destacar dezenas (vírgula):
+      <input type="text" id="lfDestacar" placeholder="Ex: 3,5,10" style="width:120px;">
+    </label>
+    <button onclick="atualizarDestaque('lotofacil')">Aplicar</button>
   </div>
   <div id="lfEstatisticas"></div>
   <canvas id="lfGrafico" height="120"></canvas>
@@ -37,6 +43,10 @@
     <label>Concurso Inicial: <input type="number" id="lmInicio"></label>
     <label>Concurso Final: <input type="number" id="lmFim"></label>
     <button onclick="carregar('lotomania')">Atualizar</button>
+    <label style="margin-left:20px;">Destacar dezenas (vírgula):
+      <input type="text" id="lmDestacar" placeholder="Ex: 3,5,10" style="width:120px;">
+    </label>
+    <button onclick="atualizarDestaque('lotomania')">Aplicar</button>
   </div>
   <div id="lmEstatisticas"></div>
   <canvas id="lmGrafico" height="120"></canvas>
@@ -45,6 +55,8 @@
 
 <script>
 let charts = {};
+let dezenasDestaque = { lotofacil: [], lotomania: [] };
+let cache = { lotofacil: null, lotomania: null };
 
 async function fetchConcurso(tipo, numero) {
   const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}/${numero}`;
@@ -105,6 +117,8 @@ async function carregar(tipo) {
 
     const maxDezena = tipo==='lotofacil'?25:100;
     const stats=calcularEstatisticas(sorteios,maxDezena);
+
+    cache[tipo] = { stats, sorteios };
     exibir(tipo,stats,sorteios);
 
   }catch(e){
@@ -117,7 +131,6 @@ function calcularEstatisticas(dados,max){
   const stats=Array(max).fill(0);
   dados.forEach(s=>{
     s.dezenas.forEach(d=>{
-      // Para Lotomania (00–99) d já é índice. Para Lotofácil (1–25) subtrair 1.
       if (max===25){
         stats[d-1]++;
       } else {
@@ -129,13 +142,17 @@ function calcularEstatisticas(dados,max){
 }
 
 function exibir(tipo,stats,sorteios){
+  const destaques = dezenasDestaque[tipo];
+
   // estatísticas
   let html=`<h2>📈 Frequência das Dezenas</h2><div class="stats">`;
   stats.forEach((c,i)=>{
+    const val = tipo==='lotofacil'? (i+1):i;
     const numero = tipo==='lotofacil'
-      ? (i+1).toString()          // 1–25
-      : i.toString().padStart(2,'0'); // 00–99
-    html+=`<div class="stat-item">
+      ? (i+1).toString()
+      : i.toString().padStart(2,'0');
+    const classe = destaques.includes(val)?'stat-item stat-item-destaque':'stat-item';
+    html+=`<div class="${classe}">
       <div style="font-size:14px;font-weight:bold;">${numero}</div>
       <div>${c} vez${c!==1?'es':''}</div>
     </div>`;
@@ -143,16 +160,19 @@ function exibir(tipo,stats,sorteios){
   html+=`</div>`;
   document.getElementById(tipo==='lotofacil'?'lfEstatisticas':'lmEstatisticas').innerHTML=html;
 
-  // resultados
+  // resultado oficial
   let html2=`<h2>🎯 Resultados Oficiais</h2>
     <table><tr><th>Concurso</th><th>Data</th><th>Dezenas</th></tr>`;
   sorteios.forEach(s=>{
     html2+=`<tr><td>${s.concurso}</td><td>${s.data}</td><td><div class="dezenas">${
       s.dezenas.map(d=>{
         const num = tipo==='lotofacil'
-          ? d.toString()               // 1–25
-          : d.toString().padStart(2,'0'); // 00–99
-        return `<div class="dezena">${num}</div>`;
+          ? d.toString()
+          : d.toString().padStart(2,'0');
+        const classe = (destaques.includes(d))
+            ? 'dezena dezena-destaque'
+            : 'dezena';
+        return `<div class="${classe}">${num}</div>`;
       }).join('')
     }</div></td></tr>`;
   });
@@ -163,9 +183,15 @@ function exibir(tipo,stats,sorteios){
   const ctx=document.getElementById(tipo==='lotofacil'?'lfGrafico':'lmGrafico').getContext('2d');
   const labels=stats.map((_,i)=>
     tipo==='lotofacil'
-      ? (i+1).toString()          // 1–25
-      : i.toString().padStart(2,'0') // 00–99
+      ? (i+1).toString()
+      : i.toString().padStart(2,'0')
   );
+
+  // cores dinâmicas
+  const backgroundColors = stats.map((_,i)=>{
+    const val = tipo==='lotofacil'? (i+1):i;
+    return destaques.includes(val)?'#ff9800':'#2196f3';
+  });
 
   if(charts[tipo]) charts[tipo].destroy();
 
@@ -176,7 +202,7 @@ function exibir(tipo,stats,sorteios){
       datasets:[{
         label:'Frequência',
         data:stats,
-        backgroundColor:'#2196f3'
+        backgroundColor:backgroundColors
       }]
     },
     options:{
@@ -189,7 +215,18 @@ function exibir(tipo,stats,sorteios){
   });
 }
 
-// carregar ao abrir
+function atualizarDestaque(tipo){
+  const val = document.getElementById(tipo==='lotofacil'?'lfDestacar':'lmDestacar').value;
+  if (val.trim()==='') {
+    dezenasDestaque[tipo]=[];
+  } else {
+    dezenasDestaque[tipo]=val.split(',')
+      .map(x=>parseInt(x.trim(),10))
+      .filter(x=>!isNaN(x));
+  }
+  if (cache[tipo]) exibir(tipo, cache[tipo].stats, cache[tipo].sorteios);
+}
+
 window.addEventListener('load',()=>{
   carregar('lotofacil');
   carregar('lotomania');
@@ -197,6 +234,4 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
-
-
 
