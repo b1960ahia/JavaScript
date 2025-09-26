@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loterias Caixa — Lotofácil & Lotomania</title>
+
+  <!-- Manifest + cor do tema -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2196f3">
+  <link rel="icon" href="icone-192.png">
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .filters { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill,minmax(60px,1fr)); gap: 10px; margin: 20px 0; }
+    .stat-item { background: #e3f2fd; padding: 10px; text-align: center; border-radius: 5px; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #2196f3; color: white; }
+    .dezenas { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; }
+    .dezena { background: #2196f3; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .dezena-destaque { background: #ff9800 !important; color: #fff !important; font-weight: bold; }
+    canvas { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Loterias Caixa — Lotofácil & Lotomania</h1>
+
+    <div class="filters">
+      <h2>Lotofácil</h2>
+      Concurso Inicial: <input type="number" id="lfInicio">
+      Concurso Final: <input type="number" id="lfFim">
+      <button onclick="carregar('lotofacil')">Atualizar</button>
+      &nbsp;|&nbsp; Destacar dezena: <input type="number" id="lfDestacar" style="width:60px;">
+      <button onclick="atualizarDestaque('lotofacil')">Aplicar</button>
+    </div>
+    <div id="lfEstatisticas"></div>
+    <canvas id="lfGrafico" height="120"></canvas>
+    <div id="lfResultados"></div>
+
+    <hr>
+
+    <div class="filters">
+      <h2>Lotomania</h2>
+      Concurso Inicial: <input type="number" id="lmInicio">
+      Concurso Final: <input type="number" id="lmFim">
+      <button onclick="carregar('lotomania')">Atualizar</button>
+      &nbsp;|&nbsp; Destacar dezena: <input type="number" id="lmDestacar" style="width:60px;">
+      <button onclick="atualizarDestaque('lotomania')">Aplicar</button>
+    </div>
+    <div id="lmEstatisticas"></div>
+    <canvas id="lmGrafico" height="120"></canvas>
+    <div id="lmResultados"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let charts = {lotofacil:null, lotomania:null};
+    let ultimo = {lotofacil:null, lotomania:null};
+    let destaque = {lotofacil:null, lotomania:null};
+
+    async function fetchConcurso(tipo,numero){
+      const urlBase = tipo==='lotofacil'
+        ? 'https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil'
+        : 'https://servicebus2.caixa.gov.br/portaldeloterias/api/lotomania';
+      const url = `${urlBase}/${numero}`;
+      const resp=await fetch(url,{
+        headers:{
+          "Accept":"application/json, text/plain, */*",
+          "Origin":"https://loterias.caixa.gov.br",
+          "Referer":"https://loterias.caixa.gov.br/"
+        }
+      });
+      if(!resp.ok)throw new Error(`Erro ${resp.status}`);
+      return await resp.json();
+    }
+
+    async function fetchUltimo(tipo){
+      const url=tipo==='lotofacil'
+        ? 'https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil'
+        : 'https://servicebus2.caixa.gov.br/portaldeloterias/api/lotomania';
+      const resp=await fetch(url,{
+        headers:{
+          "Accept":"application/json, text/plain, */*",
+          "Origin":"https://loterias.caixa.gov.br",
+          "Referer":"https://loterias.caixa.gov.br/"
+        }
+      });
+      if(!resp.ok)throw new Error(`Erro ${resp.status}`);
+      return await resp.json();
+    }
+
+    async function carregar(tipo){
+      try{
+        const iniInput=document.getElementById(tipo==='lotofacil'?'lfInicio':'lmInicio').value;
+        const fimInput=document.getElementById(tipo==='lotofacil'?'lfFim':'lmFim').value;
+        let inicio=parseInt(iniInput), fim=parseInt(fimInput);
+        if(!inicio||!fim){
+          const ultimoConc=await fetchUltimo(tipo);
+          const numUltimo=ultimoConc.numero;
+          fim=numUltimo; inicio=numUltimo-20;
+          document.getElementById(tipo==='lotofacil'?'lfInicio':'lmInicio').value=inicio;
+          document.getElementById(tipo==='lotofacil'?'lfFim':'lmFim').value=fim;
+        }
+        if(inicio>fim){alert('Concurso inicial não pode ser maior que final');return;}
+
+        const resultados=[];
+        for(let n=inicio;n<=fim;n++){
+          try{
+            const d=await fetchConcurso(tipo,n);
+            resultados.push(d);
+          }catch(err){console.warn('Falha no concurso',n,err);}
+        }
+
+        const sorteios=resultados.map(d=>({
+          concurso:d.numero,
+          data:d.dataApuracao,
+          dezenas:d.listaDezenas.map(x=>parseInt(x,10)).sort((a,b)=>a-b)
+        }));
+
+        const stats=calcularEstatisticas(tipo,sorteios);
+        ultimo[tipo]={stats,sorteios};
+        exibir(tipo,stats,sorteios);
+      }catch(e){
+        console.error(e);alert('Erro ao carregar dados');
+      }
+    }
+
+    function calcularEstatisticas(tipo,dados){
+      const max=tipo==='lotofacil'?25:100;
+      const stats=Array(max).fill(0);
+      dados.forEach(s=>{
+        s.dezenas.forEach(d=>stats[d-(tipo==='lotofacil'?1:0)]++);
+      });
+      return stats;
+    }
+
+    function exibir(tipo,stats,sorteios){
+      // Estatísticas
+      let html=`<h2>📈 Frequência das Dezenas</h2><div class="stats">`;
+      stats.forEach((c,i)=>{
+        const numero=tipo==='lotofacil'?(i+1).toString():i.toString().padStart(2,'0');
+        html+=`<div class="stat-item"><div style="font-size:14px;font-weight:bold;">${numero}</div><div>${c} vez${c!==1?'es':''}</div></div>`;
+      });
+      html+=`</div>`;
+      document.getElementById(tipo==='lotofacil'?'lfEstatisticas':'lmEstatisticas').innerHTML=html;
+
+      // Resultados
+      let html2=`<h2>🎯 Resultados Oficiais</h2>
+        <table><tr><th>Concurso</th><th>Data</th><th>Dezenas</th></tr>`;
+      sorteios.forEach(s=>{
+        html2+=`<tr><td>${s.concurso}</td><td>${s.data}</td><td><div class="dezenas">${
+          s.dezenas.map(d=>{
+            const num=tipo==='lotofacil'?d.toString():d.toString().padStart(2,'0');
+            const classe=(destaque[tipo]!==null&&d===destaque[tipo])?'dezena dezena-destaque':'dezena';
+            return `<div class="${classe}">${num}</div>`;
+          }).join('')
+        }</div></td></tr>`;
+      });
+      html2+=`</table>`;
+      document.getElementById(tipo==='lotofacil'?'lfResultados':'lmResultados').innerHTML=html2;
+
+      // Gráfico
+      const ctx=document.getElementById(tipo==='lotofacil'?'lfGrafico':'lmGrafico').getContext('2d');
+      const labels=stats.map((_,i)=>tipo==='lotofacil'?(i+1).toString():i.toString().padStart(2,'0'));
+      if(charts[tipo])charts[tipo].destroy();
+      charts[tipo]=new Chart(ctx,{
+        type:'bar',
+        data:{labels,datasets:[{label:'Frequência',data:stats,backgroundColor:'#2196f3'}]},
+        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Quantidade'}},x:{title:{display:true,text:'Dezena'}}}}
+      });
+    }
+
+    function atualizarDestaque(tipo){
+      const val=document.getElementById(tipo==='lotofacil'?'lfDestacar':'lmDestacar').value;
+      destaque[tipo]=val?parseInt(val,10):null;
+      if(ultimo[tipo])exibir(tipo,ultimo[tipo].stats,ultimo[tipo].sorteios);
+    }
+
+    // Carregar dados ao abrir
+    window.addEventListener('load',()=>{
+      carregar('lotofacil');
+      carregar('lotomania');
+    });
+
+    // registrar Service Worker
+    if('serviceWorker'in navigator){
+      navigator.serviceWorker.register('sw.js').then(()=>console.log('Service Worker registrado'));
+    }
+  </script>
+</body>
+</html>
