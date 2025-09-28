@@ -1,8 +1,7 @@
 {
   "name": "Loterias Análise",
   "short_name": "Loterias",
-  "start_url": "/JavaScript/LotoMenu/lotomenu.html",
-
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196f3",
@@ -19,3 +18,4 @@
     }
   ]
 }
+
