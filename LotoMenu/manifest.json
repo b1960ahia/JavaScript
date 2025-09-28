@@ -1,21 +1,22 @@
 {
   "name": "Loterias Análise",
   "short_name": "Loterias",
-  "start_url": "./index.html",
+  "start_url": "/JavaScript/LotoMenu/lotomenu.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196f3",
   "icons": [
     {
-      "src": "icone-192.png",
+      "src": "/JavaScript/LotoMenu/icone-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icone-512.png",
+      "src": "/JavaScript/LotoMenu/icone-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
 }
+
 
