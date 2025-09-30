@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Loterias Análise (PWA)</title>
+  <meta name="theme-color" content="#2196f3">
+  <meta name="background-color" content="#ffffff">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2196f3">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .filters { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill,minmax(70px,1fr)); gap: 10px; margin: 20px 0; }
+    .stat-item { background: #e3f2fd; padding: 10px; text-align: center; border-radius: 5px; }
+    .stat-item.destacada { background: #ff5722; color: #fff; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #2196f3; color: white; }
+    .dezenas { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+    .dezena { background: #2196f3; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .dezena.destacada { background: #ff5722 !important; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Loterias — Dados Oficiais</h1>
+
+    <div class="filters">
+      <label>Loteria:
+        <select id="tipoLoteria" onchange="carregarDados()">
+          <option value="lotofacil">Lotofácil</option>
+          <option value="megasena">Mega-Sena</option>
+          <option value="quina">Quina</option>
+          <option value="lotomania">Lotomania</option>
+        </select>
+      </label>
+      <label>Concurso Inicial: <input type="number" id="concursoInicio"></label>
+      <label>Concurso Final: <input type="number" id="concursoFim"></label>
+      <label>Destacar dezena: <input type="number" id="dezenaDestaque" style="width:60px" oninput="atualizarDestaque()"></label>
+      <button onclick="carregarDados()">Atualizar</button>
+    </div>
+
+    <div id="estatisticas"></div>
+    <div style="overflow-x:auto;">
+      <canvas id="grafico"></canvas>
+    </div>
+    <div id="tabelaResultados"></div>
+  </div>
+
+  <script>
+    let chartGrafico = null;
+    let statsGlobais = [];
+    let cfgAtual = null;
+
+    const cfgLoterias = {
+      lotofacil:  {nome:"Lotofácil",  max:25,  api:"lotofacil"},
+      megasena:   {nome:"Mega-Sena",  max:60,  api:"megasena"},
+      quina:      {nome:"Quina",      max:80,  api:"quina"},
+      lotomania:  {nome:"Lotomania",  max:100, api:"lotomania"}
+    };
+
+    async function fetchConcurso(tipo, numero) {
+      const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}/${numero}`;
+      const resp = await fetch(url, {
+        headers: {
+          "Accept": "application/json, text/plain, */*",
+          "Origin": "https://loterias.caixa.gov.br",
+          "Referer": "https://loterias.caixa.gov.br/",
+        }
+      });
+      if (!resp.ok) throw new Error(`Erro ao buscar concurso ${numero}: ${resp.status}`);
+      return await resp.json();
+    }
+
+    async function fetchUltimoConcurso(tipo) {
+      const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}`;
+      const resp = await fetch(url, {
+        headers: {
+          "Accept": "application/json, text/plain, */*",
+          "Origin": "https://loterias.caixa.gov.br",
+          "Referer": "https://loterias.caixa.gov.br/",
+        }
+      });
+      if (!resp.ok) throw new Error(`Erro ao buscar último concurso: ${resp.status}`);
+      return await resp.json();
+    }
+
+    async function carregarDados() {
+      try {
+        const tipoSel = document.getElementById('tipoLoteria').value;
+        cfgAtual = cfgLoterias[tipoSel];
+        let inicio = parseInt(document.getElementById('concursoInicio').value);
+        let fim = parseInt(document.getElementById('concursoFim').value);
+
+        if (!inicio || !fim) {
+          const ultimo = await fetchUltimoConcurso(cfgAtual.api);
+          fim = ultimo.numero;
+          inicio = fim - 20;
+          document.getElementById('concursoFim').value = fim;
+          document.getElementById('concursoInicio').value = inicio;
+        }
+
+        if (inicio > fim) {
+          alert("Concurso inicial não pode ser maior que o final.");
+          return;
+        }
+
+        const resultados = [];
+        for (let n = inicio; n <= fim; n++) {
+          try {
+            const dado = await fetchConcurso(cfgAtual.api, n);
+            resultados.push(dado);
+          } catch (err) {
+            console.warn("Falha no concurso:", n, err);
+          }
+        }
+
+        const sorteios = resultados.map(d => ({
+          concurso: d.numero,
+          data: d.dataApuracao,
+          dezenas: d.listaDezenas.map(x => parseInt(x,10)).sort((a,b)=>a-b)
+        }));
+
+        statsGlobais = calcularEstatisticas(sorteios, cfgAtual.max);
+        exibirEstatisticas(statsGlobais, cfgAtual.max);
+        exibirResultados(sorteios, cfgAtual.max);
+        exibirGrafico(statsGlobais, cfgAtual);
+
+      } catch (e) {
+        console.error("Erro ao carregar dados:", e);
+        alert("Não foi possível buscar os dados oficiais. Verifique console.");
+      }
+    }
+
+    function calcularEstatisticas(dados, max) {
+      const stats = Array(max).fill(0);
+      dados.forEach(s => {
+        s.dezenas.forEach(d => {
+          stats[d-1]++;
+        });
+      });
+      return stats;
+    }
+
+    function exibirEstatisticas(stats, max) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      let html = `<h2>📈 Frequência das Dezenas</h2><div class="stats">`;
+      stats.forEach((c, i) => {
+        const cls = (dezenaDestaque && (i+1) === dezenaDestaque) ? 'stat-item destacada' : 'stat-item';
+        html += `<div class="${cls}"><div style="font-size:18px; font-weight:bold;">${String(i+1).padStart(2,'0')}</div><div>${c} vez${c!==1?'es':''}</div></div>`;
+      });
+      html += `</div>`;
+      document.getElementById('estatisticas').innerHTML = html;
+    }
+
+    function exibirResultados(sorteios, max) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      let html = `<h2>🎯 Resultados Oficiais</h2><table><tr><th>Concurso</th><th>Data</th><th>Dezenas</th></tr>`;
+      sorteios.forEach(s => {
+        html += `<tr><td>${s.concurso}</td><td>${s.data}</td><td><div class="dezenas">`;
+        html += s.dezenas.map(d => {
+          const cls = (dezenaDestaque && d === dezenaDestaque) ? 'dezena destacada' : 'dezena';
+          return `<div class="${cls}">${String(d).padStart(2,'0')}</div>`;
+        }).join('');
+        html += `</div></td></tr>`;
+      });
+      html += `</table>`;
+      document.getElementById('tabelaResultados').innerHTML = html;
+    }
+
+    function exibirGrafico(stats, cfg) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      const canvas = document.getElementById('grafico');
+      canvas.width = cfg.max * 25;
+      canvas.height = cfg.max <= 25 ? 120 : 200;
+
+      const ctx = canvas.getContext('2d');
+      const labels = stats.map((_, i) => String(i+1).padStart(2,'0'));
+      const colors = stats.map((_, i) => {
+        return (dezenaDestaque && (i+1) === dezenaDestaque) ? '#ff5722' : '#2196f3';
+      });
+
+      if (chartGrafico) chartGrafico.destroy();
+
+      chartGrafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Frequência',
+            data: stats,
+            backgroundColor: colors
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } },
+            x: { title: { display: true, text: 'Dezena' } }
+          }
+        }
+      });
+    }
+
+    function atualizarDestaque() {
+      exibirEstatisticas(statsGlobais, cfgAtual.max);
+      exibirResultados([], cfgAtual.max);
+      exibirGrafico(statsGlobais, cfgAtual);
+    }
+
+    window.addEventListener('load', carregarDados);
+  </script>
+</body>
+</html>
+
