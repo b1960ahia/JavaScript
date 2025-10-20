@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pescado do Furimba - Pitimbu-PB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c5aa0;
+            --primary-dark: #1e3d6f;
+            --secondary: #f8b500;
+            --secondary-dark: #d69e00;
+            --light: #f5f5f5;
+            --dark: #333;
+            --success: #4CAF50;
+            --danger: #F44336;
+            --warning: #FF9800;
+            --gray: #e0e0e0;
+            --gray-dark: #9e9e9e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--dark);
+        }
+        
+        .tab-button:hover {
+            background: var(--gray);
+        }
+        
+        .tab-button.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray);
+        }
+        
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            padding: 15px;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-header h3 {
+            margin-left: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .card-body {
+            padding: 15px;
+        }
+        
+        .card-body p {
+            margin-bottom: 10px;
+        }
+        
+        .card-body button {
+            width: 100%;
+            padding: 10px;
+            background: var(--secondary);
+            color: var(--dark);
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .card-body button:hover {
+            background: var(--secondary-dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-primary i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid var(--success);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        th {
+            background: var(--primary);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-filter input, .search-filter select {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: var(--gray-dark);
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-dark);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--gray);
+        }
+        
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .search-filter {
+                flex-direction: column;
+            }
+            
+            .search-filter input, .search-filter select {
+                min-width: 100%;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-fish"></i> PESCADO DO FURIMBA - Pitimbu-PB <i class="fas fa-anchor"></i></h1>
+            <p>Os melhores pescados da região!</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('venda')"><i class="fas fa-shopping-cart"></i> Venda</button>
+            <button class="tab-button" onclick="openTab('estoque')"><i class="fas fa-boxes"></i> Estoque</button>
+            <button class="tab-button" onclick="openTab('historico')"><i class="fas fa-history"></i> Histórico</button>
+        </div>
+
+        <div id="venda" class="tab-content active">
+            <h2><i class="fas fa-fish"></i> Pescados Disponíveis</h2>
+            
+            <div class="search-filter">
+                <input type="text" id="search-pescado" placeholder="Buscar pescado..." onkeyup="filtrarPescados()">
+                <select id="filter-categoria" onchange="filtrarPescados()">
+                    <option value="">Todas as categorias</option>
+                    <option value="peixe">Peixes</option>
+                    <option value="frutos-mar">Frutos do Mar</option>
+                </select>
+            </div>
+            
+            <div class="cards-container" id="cards-container">
+                <!-- Cards serão gerados via JavaScript -->
+            </div>
+
+            <h2><i class="fas fa-cash-register"></i> Realizar Venda</h2>
+            <div class="form-group">
+                <label for="pescado">Selecione o Pescado:</label>
+                <select id="pescado">
+                    <option value="">-- Selecione --</option>
+                    <!-- Opções serão preenchidas via JavaScript -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quantidade">Quantidade (kg):</label>
+                <input type="number" id="quantidade" min="0.1" step="0.1" value="0.1">
+            </div>
+
+            <button class="btn-primary" onclick="realizarVenda()"><i class="fas fa-check"></i> Realizar Venda</button>
+
+            <div class="result-box">
+                <h3><i class="fas fa-receipt"></i> Resumo da Venda</h3>
+                <div id="resultado">
+                    <p>Nenhuma venda realizada ainda.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="estoque" class="tab-content">
+            <h2><i class="fas fa-boxes"></i> Controle de Estoque</h2>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3 id="total-estoque">0</h3>
+                    <p>Total em Estoque (kg)</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="total-valor">R$ 0,00</h3>
+                    <p>Valor Total do Estoque</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="total-itens">0</h3>
+                    <p>Itens em Estoque</p>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pescado</th>
+                        <th>Preço/kg (R$)</th>
+                        <th>Estoque (kg)</th>
+                        <th>Valor Total</th>
+                    </tr>
+                </thead>
+                <tbody id="estoque-body">
+                    <!-- Conteúdo será preenchido via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="historico" class="tab-content">
+            <h2><i class="fas fa-history"></i> Histórico de Vendas</h2>
+            
+            <div class="search-filter">
+                <input type="text" id="search-historico" placeholder="Buscar no histórico..." onkeyup="filtrarHistorico()">
+                <select id="filter-data" onchange="filtrarHistorico()">
+                    <option value="">Todas as datas</option>
+                    <option value="hoje">Hoje</option>
+                    <option value="semana">Esta semana</option>
+                    <option value="mes">Este mês</option>
+                </select>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3 id="total-vendas">0</h3>
+                    <p>Total de Vendas</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="total-receita">R$ 0,00</h3>
+                    <p>Receita Total</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="media-venda">R$ 0,00</h3>
+                    <p>Média por Venda</p>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Pescado</th>
+                        <th>Quantidade (kg)</th>
+                        <th>Valor (R$)</th>
+                    </tr>
+                </thead>
+                <tbody id="historico-body">
+                    <!-- Conteúdo será preenchido via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p><i class="fas fa-phone"></i> (83) 99999-9999 • <i class="fas fa-map-marker-alt"></i> Pitimbu-PB • VOLTE SEMPRE!</p>
+        </footer>
+
+        <div class="notification" id="notification"></div>
+    </div>
+
+    <script>
+        // Dados dos pescados
+        let pescados = {
+            "Salmão": { preco_por_quilo: 50.00, peso: 40, cor: "#ff6b6b", imagem: "🐟", categoria: "peixe" },
+            "Tilápia": { preco_por_quilo: 30.00, peso: 15, cor: "#4ecdc4", imagem: "🐠", categoria: "peixe" },
+            "Bacalhau": { preco_por_quilo: 80.00, peso: 12, cor: "#45b7d1", imagem: "🎣", categoria: "peixe" },
+            "Dourado": { preco_por_quilo: 45.00, peso: 25, cor: "#96ceb4", imagem: "🐡", categoria: "peixe" },
+            "Sardinha": { preco_por_quilo: 20.00, peso: 28, cor: "#feca57", imagem: "🐟", categoria: "peixe" },
+            "Tainha": { preco_por_quilo: 22.00, peso: 21, cor: "#ff9ff3", imagem: "🐠", categoria: "peixe" },
+            "Camarão": { preco_por_quilo: 65.00, peso: 18, cor: "#f368e0", imagem: "🦐", categoria: "frutos-mar" },
+            "Lula": { preco_por_quilo: 55.00, peso: 14, cor: "#ff9f43", imagem: "🦑", categoria: "frutos-mar" },
+            "Ostra": { preco_por_quilo: 40.00, peso: 8, cor: "#54a0ff", imagem: "🦪", categoria: "frutos-mar" }
+        };
+
+        // Histórico de vendas
+        let historicoVendas = [];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDados();
+            renderizarCards();
+            preencherSelectPescados();
+            atualizarEstoque();
+        });
+
+        // Função para carregar dados do localStorage
+        function carregarDados() {
+            const dadosSalvos = localStorage.getItem('pescadosFurimba');
+            const historicoSalvo = localStorage.getItem('historicoVendasFurimba');
+            
+            if (dadosSalvos) {
+                pescados = JSON.parse(dadosSalvos);
+            }
+            
+            if (historicoSalvo) {
+                historicoVendas = JSON.parse(historicoSalvo);
+            }
+        }
+
+        // Função para salvar dados no localStorage
+        function salvarDados() {
+            localStorage.setItem('pescadosFurimba', JSON.stringify(pescados));
+            localStorage.setItem('historicoVendasFurimba', JSON.stringify(historicoVendas));
+        }
+
+        // Função para abrir abas
+        function openTab(tabName) {
+            // Esconder todas as abas
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+
+            // Remover classe active de todos os botões
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+
+            // Mostrar a aba selecionada e marcar o botão como ativo
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            // Atualizar dados se for a aba de estoque ou histórico
+            if (tabName === 'estoque') {
+                atualizarEstoque();
+            } else if (tabName === 'historico') {
+                atualizarHistorico();
+            }
+        }
+
+        // Função para filtrar pescados
+        function filtrarPescados() {
+            const termo = document.getElementById('search-pescado').value.toLowerCase();
+            const categoria = document.getElementById('filter-categoria').value;
+            
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            
+            let encontrouResultados = false;
+            
+            for (const [nome, dados] of Object.entries(pescados)) {
+                // Verificar filtros
+                if (termo && !nome.toLowerCase().includes(termo)) continue;
+                if (categoria && dados.categoria !== categoria) continue;
+                
+                encontrouResultados = true;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                card.innerHTML = `
+                    <div class="card-header" style="background-color: ${dados.cor}">
+                        <span style="font-size: 24px; margin-right: 10px;">${dados.imagem}</span>
+                        <h3>${nome}</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Preço:</strong> R$ ${dados.preco_por_quilo.toFixed(2)}/kg</p>
+                        <p><strong>Estoque:</strong> ${dados.peso.toFixed(1)} kg</p>
+                        <p><strong>Categoria:</strong> ${dados.categoria === 'peixe' ? 'Peixe' : 'Frutos do Mar'}</p>
+                        <button onclick="selecionarPescado('${nome}')">Selecionar</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            }
+            
+            if (!encontrouResultados) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>Nenhum pescado encontrado</h3>
+                        <p>Tente ajustar os filtros de busca</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para renderizar os cards dos pescados
+        function renderizarCards() {
+            filtrarPescados(); // Usa a função de filtro para renderizar todos inicialmente
+        }
+
+        // Função para preencher o select de pescados
+        function preencherSelectPescados() {
+            const select = document.getElementById('pescado');
+            select.innerHTML = '<option value="">-- Selecione --</option>';
+            
+            for (const nome in pescados) {
+                const option = document.createElement('option');
+                option.value = nome;
+                option.textContent = nome;
+                select.appendChild(option);
+            }
+        }
+
+        // Função para selecionar um pescado a partir de um card
+        function selecionarPescado(nome) {
+            document.getElementById('pescado').value = nome;
+            mostrarNotificacao(`${nome} selecionado!`);
+        }
+
+        // Função para realizar uma venda
+        function realizarVenda() {
+            const nomePescado = document.getElementById('pescado').value;
+            const quantidade = parseFloat(document.getElementById('quantidade').value);
+            
+            // Validações
+            if (!nomePescado) {
+                mostrarNotificacao('Por favor, selecione um pescado.', 'error');
+                return;
+            }
+            
+            if (isNaN(quantidade) || quantidade <= 0) {
+                mostrarNotificacao('Por favor, informe uma quantidade válida.', 'error');
+                return;
+            }
+            
+            const pescado = pescados[nomePescado];
+            
+            if (quantidade > pescado.peso) {
+                mostrarNotificacao(`Desculpe, temos apenas ${pescado.peso.toFixed(1)}kg de ${nomePescado} em estoque.`, 'error');
+                return;
+            }
+            
+            // Calcular preço total
+            const precoTotal = pescado.preco_por_quilo * quantidade;
+            
+            // Atualizar estoque
+            pescado.peso -= quantidade;
+            
+            // Registrar venda no histórico
+            const dataHora = new Date().toLocaleString('pt-BR');
+            historicoVendas.push({
+                dataHora,
+                nomePescado,
+                quantidade,
+                precoTotal
+            });
+            
+            // Atualizar a interface
+            renderizarCards();
+            atualizarEstoque();
+            
+            // Salvar dados
+            salvarDados();
+            
+            // Mostrar resultado
+            document.getElementById('resultado').innerHTML = `
+                <p><strong>Compra realizada com sucesso!</strong></p>
+                <p>Pescado: ${nomePescado}</p>
+                <p>Quantidade: ${quantidade.toFixed(2)} kg</p>
+                <p>Preço total: R$ ${precoTotal.toFixed(2)}</p>
+                <p>Estoque restante: ${pescado.peso.toFixed(2)} kg</p>
+            `;
+            
+            // Limpar campos
+            document.getElementById('pescado').value = '';
+            document.getElementById('quantidade').value = '0.1';
+            
+            mostrarNotificacao(`Venda realizada! Total: R$ ${precoTotal.toFixed(2)}`);
+        }
+
+        // Função para atualizar a tabela de estoque
+        function atualizarEstoque() {
+            const tbody = document.getElementById('estoque-body');
+            tbody.innerHTML = '';
+            
+            let totalEstoque = 0;
+            let totalValor = 0;
+            let totalItens = 0;
+            
+            for (const [nome, dados] of Object.entries(pescados)) {
+                const valorTotal = dados.preco_por_quilo * dados.peso;
+                
+                totalEstoque += dados.peso;
+                totalValor += valorTotal;
+                totalItens++;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${nome}</td>
+                    <td>R$ ${dados.preco_por_quilo.toFixed(2)}</td>
+                    <td>${dados.peso.toFixed(1)} kg</td>
+                    <td>R$ ${valorTotal.toFixed(2)}</td>
+                `;
+                
+                tbody.appendChild(row);
+            }
+            
+            // Atualizar estatísticas
+            document.getElementById('total-estoque').textContent = totalEstoque.toFixed(1);
+            document.getElementById('total-valor').textContent = `R$ ${totalValor.toFixed(2)}`;
+            document.getElementById('total-itens').textContent = totalItens;
+            
+            if (Object.keys(pescados).length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <h3>Estoque vazio</h3>
+                            <p>Nenhum pescado disponível no momento</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Função para filtrar histórico
+        function filtrarHistorico() {
+            atualizarHistorico(); // Por simplicidade, vamos usar a mesma função
+        }
+
+        // Função para atualizar o histórico de vendas
+        function atualizarHistorico() {
+            const tbody = document.getElementById('historico-body');
+            tbody.innerHTML = '';
+            
+            const termo = document.getElementById('search-historico').value.toLowerCase();
+            const filtroData = document.getElementById('filter-data').value;
+            
+            // Filtrar vendas
+            let vendasFiltradas = historicoVendas.filter(venda => {
+                // Filtro por termo de busca
+                if (termo && !venda.nomePescado.toLowerCase().includes(termo)) {
+                    return false;
+                }
+                
+                // Filtro por data
+                if (filtroData) {
+                    const dataVenda = new Date(venda.dataHora.split(', ')[0].split('/').reverse().join('-'));
+                    const hoje = new Date();
+                    
+                    if (filtroData === 'hoje') {
+                        return dataVenda.toDateString() === hoje.toDateString();
+                    } else if (filtroData === 'semana') {
+                        const inicioSemana = new Date(hoje);
+                        inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+                        return dataVenda >= inicioSemana;
+                    } else if (filtroData === 'mes') {
+                        return dataVenda.getMonth() === hoje.getMonth() && 
+                               dataVenda.getFullYear() === hoje.getFullYear();
+                    }
+                }
+                
+                return true;
+            });
+            
+            // Mostrar as últimas 10 vendas (ou todas se filtradas)
+            const vendasRecentes = vendasFiltradas.slice(-10).reverse();
+            
+            let totalVendas = 0;
+            let totalReceita = 0;
+            
+            for (const venda of vendasRecentes) {
+                totalVendas++;
+                totalReceita += venda.precoTotal;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${venda.dataHora}</td>
+                    <td>${venda.nomePescado}</td>
+                    <td>${venda.quantidade.toFixed(2)} kg</td>
+                    <td>R$ ${venda.precoTotal.toFixed(2)}</td>
+                `;
+                
+                tbody.appendChild(row);
+            }
+            
+            // Atualizar estatísticas
+            document.getElementById('total-vendas').textContent = totalVendas;
+            document.getElementById('total-receita').textContent = `R$ ${totalReceita.toFixed(2)}`;
+            document.getElementById('media-venda').textContent = totalVendas > 0 ? 
+                `R$ ${(totalReceita / totalVendas).toFixed(2)}` : 'R$ 0,00';
+            
+            if (vendasRecentes.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>Nenhuma venda encontrada</h3>
+                            <p>Realize vendas para ver o histórico</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Função para mostrar notificações
+        function mostrarNotificacao(mensagem, tipo = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = mensagem;
+            
+            if (tipo === 'success') {
+                notification.style.backgroundColor = '#4CAF50';
+            } else if (tipo === 'error') {
+                notification.style.backgroundColor = '#F44336';
+            } else if (tipo === 'warning') {
+                notification.style.backgroundColor = '#FF9800';
+            }
+            
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
