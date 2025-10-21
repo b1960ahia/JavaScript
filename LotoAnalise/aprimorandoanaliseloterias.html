@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Loterias Análise (PWA)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2196f3">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .filters { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill,minmax(70px,1fr)); gap: 10px; margin: 20px 0; }
+    .stat-item { background: #e3f2fd; padding: 10px; text-align: center; border-radius: 5px; transition: all .2s; }
+    .stat-item:hover { transform: scale(1.05); background: #bbdefb; }
+    .stat-item.destacada { background: #ff5722; color: #fff; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #2196f3; color: white; }
+    .dezenas { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+    .dezena { background: #2196f3; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; transition: transform .15s; }
+    .dezena:hover { transform: scale(1.1); background: #1976d2; }
+    .dezena.destacada { background: #ff5722 !important; }
+    #loading { text-align: center; padding: 10px; font-style: italic; }
+    #analiseProb { background: #f1f8e9; padding: 10px; border-radius: 6px; margin-top: 20px; border: 1px solid #c5e1a5; }
+    #comboProb { background: #fffde7; border: 1px solid #fdd835; padding: 15px; border-radius: 6px; margin-top: 10px; display: none; }
+    #comboProb h3 { margin: 0 0 10px; }
+    button.acao { background: #2196f3; color: #fff; border: none; padding: 8px 15px; margin-top: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background .2s; }
+    button.acao:hover { background: #1976d2; }
+    .jogo { margin: 10px 0; padding: 8px; border-radius: 5px; background: #fff8e1; }
+    .jogo:nth-child(odd) { background: #fffde7; }
+    .campoQtd { margin-top: 10px; font-size: 14px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Loterias — Dados Oficiais e Análise Preditiva</h1>
+
+    <div class="filters">
+      <label>Loteria:
+        <select id="tipoLoteria" onchange="carregarDados()">
+          <option value="lotofacil">Lotofácil</option>
+          <option value="megasena">Mega-Sena</option>
+          <option value="quina">Quina</option>
+          <option value="lotomania">Lotomania</option>
+        </select>
+      </label>
+      <label>Concurso Inicial: <input type="number" id="concursoInicio"></label>
+      <label>Concurso Final: <input type="number" id="concursoFim"></label>
+      <label>Destacar dezena: <input type="number" id="dezenaDestaque" style="width:60px" oninput="atualizarDestaque()"></label>
+      <button onclick="carregarDados()" class="acao">Atualizar</button>
+    </div>
+
+    <div id="loading"></div>
+    <div id="estatisticas"></div>
+    <div style="overflow-x:auto;">
+      <canvas id="grafico"></canvas>
+    </div>
+    <div id="tabelaResultados"></div>
+    <div id="analiseProb"></div>
+    <div id="comboProb"></div>
+  </div>
+
+  <script>
+    let chartGrafico = null;
+    let statsGlobais = [];
+    let cfgAtual = null;
+    let ultimosSorteios = [];
+    let ultimoScore = [];
+
+    const cfgLoterias = {
+      lotofacil:  {nome:"Lotofácil",  max:25,  api:"lotofacil", tamanho:15},
+      megasena:   {nome:"Mega-Sena",  max:60,  api:"megasena", tamanho:6},
+      quina:      {nome:"Quina",      max:80,  api:"quina", tamanho:5},
+      lotomania:  {nome:"Lotomania",  max:100, api:"lotomania", tamanho:50}
+    };
+
+    async function fetchConcurso(tipo, numero) {
+      const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}/${numero}`;
+      const resp = await fetch(url, { headers: { "Accept": "application/json, text/plain, */*" } });
+      if (!resp.ok) throw new Error(`Erro ao buscar concurso ${numero}: ${resp.status}`);
+      return await resp.json();
+    }
+
+    async function fetchUltimoConcurso(tipo) {
+      const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}`;
+      const resp = await fetch(url, { headers: { "Accept": "application/json, text/plain, */*" } });
+      if (!resp.ok) throw new Error(`Erro ao buscar último concurso: ${resp.status}`);
+      return await resp.json();
+    }
+
+    async function carregarDados() {
+      try {
+        document.getElementById('loading').innerHTML = "⏳ Carregando dados...";
+        document.getElementById('estatisticas').innerHTML = "";
+        document.getElementById('tabelaResultados').innerHTML = "";
+        document.getElementById('analiseProb').innerHTML = "";
+        document.getElementById('comboProb').style.display = "none";
+
+        const tipoSel = document.getElementById('tipoLoteria').value;
+        cfgAtual = cfgLoterias[tipoSel];
+        let inicio = parseInt(document.getElementById('concursoInicio').value);
+        let fim = parseInt(document.getElementById('concursoFim').value);
+
+        if (!inicio || !fim) {
+          const ultimo = await fetchUltimoConcurso(cfgAtual.api);
+          fim = ultimo.numero;
+          inicio = fim - 20;
+          document.getElementById('concursoFim').value = fim;
+          document.getElementById('concursoInicio').value = inicio;
+        }
+
+        if (inicio > fim) {
+          alert("Concurso inicial não pode ser maior que o final.");
+          return;
+        }
+
+        const promises = [];
+        for (let n = inicio; n <= fim; n++) {
+          promises.push(fetchConcurso(cfgAtual.api, n).catch(() => null));
+        }
+        const resultados = (await Promise.all(promises)).filter(r => r);
+
+        const sorteios = resultados.map(d => ({
+          concurso: d.numero,
+          data: d.dataApuracao,
+          dezenas: d.listaDezenas.map(x => parseInt(x,10)).sort((a,b)=>a-b)
+        }));
+
+        ultimosSorteios = sorteios;
+        statsGlobais = calcularEstatisticas(sorteios, cfgAtual.max);
+        exibirEstatisticas(statsGlobais, cfgAtual.max);
+        exibirResultados(sorteios, cfgAtual.max);
+        exibirGrafico(statsGlobais, cfgAtual);
+        exibirAnaliseProbabilistica(sorteios, cfgAtual);
+
+        document.getElementById('loading').innerHTML = "";
+
+      } catch (e) {
+        console.error("Erro ao carregar dados:", e);
+        alert("Não foi possível buscar os dados oficiais.");
+      }
+    }
+
+    function calcularEstatisticas(dados, max) {
+      const stats = Array(max).fill(0);
+      dados.forEach(s => s.dezenas.forEach(d => stats[d-1]++));
+      return stats;
+    }
+
+    // === MODELO EMPÍRICO AJUSTADO ===
+    function exibirAnaliseProbabilistica(sorteios, cfg) {
+      const total = sorteios.length;
+      const max = cfg.max;
+      const matriz = Array.from({length:max}, () => Array(max).fill(0));
+      const freq = Array(max).fill(0);
+
+      sorteios.forEach(s => {
+        s.dezenas.forEach(d1 => {
+          freq[d1-1]++;
+          s.dezenas.forEach(d2 => {
+            if (d1 !== d2) matriz[d1-1][d2-1]++;
+          });
+        });
+      });
+
+      const p = freq.map(f => f/total);
+      const p2 = matriz.map(l => l.map(v => v/total));
+
+      const associacao = Array(max).fill(0);
+      for (let i=0;i<max;i++) {
+        let soma=0, cont=0;
+        for (let j=0;j<max;j++) {
+          if(i!==j && p[i]>0 && p[j]>0) {
+            soma += p2[i][j]/(p[i]*p[j]);
+            cont++;
+          }
+        }
+        associacao[i] = soma/cont;
+      }
+
+      const score = freq.map((f,i)=> f * associacao[i]);
+      ultimoScore = score;
+
+      const top = [...score.entries()].sort((a,b)=>b[1]-a[1]).slice(0,cfg.tamanho);
+      const topDezenas = top.map(x=>x[0]+1);
+
+      const html = `
+        <h2>🔮 Análise Preditiva — Modelo Empírico Ajustado</h2>
+        <p>Dezenas mais prováveis no próximo concurso da <b>${cfg.nome}</b>:</p>
+        <div class="dezenas">
+          ${topDezenas.map(d=>`<div class="dezena destacada">${String(d).padStart(2,'0')}</div>`).join('')}
+        </div>
+        <div class="campoQtd">
+          <label>Quantidade de apostas: <input type="number" id="qtdApostas" value="5" min="1" max="20" style="width:60px;text-align:center"></label>
+        </div>
+        <button class="acao" onclick="gerarCombinacoesProbaveis()">🎲 Gerar Combinações Prováveis</button>
+        <p style="font-size:13px;color:#555">*Estimativa empírica com ${total} concursos analisados.</p>
+      `;
+      document.getElementById("analiseProb").innerHTML = html;
+    }
+
+    // === GERAÇÃO DE MÚLTIPLAS APOSTAS ===
+    function gerarCombinacoesProbaveis() {
+      if (!ultimoScore.length) return;
+      const cfg = cfgAtual;
+      const qtd = parseInt(document.getElementById("qtdApostas").value) || 5;
+      const probs = ultimoScore.map((s,i)=>({num:i+1,score:s}));
+      const soma = probs.reduce((a,b)=>a+b.score,0);
+      probs.forEach(p=>p.prob=p.score/soma);
+
+      const jogos = [];
+
+      for (let j=0; j<qtd; j++) {
+        const escolhidas = [];
+        while (escolhidas.length < cfg.tamanho) {
+          const r = Math.random();
+          let acum = 0;
+          for (const p of probs) {
+            acum += p.prob;
+            if (r <= acum && !escolhidas.includes(p.num)) {
+              escolhidas.push(p.num);
+              break;
+            }
+          }
+        }
+        escolhidas.sort((a,b)=>a-b);
+        if (!jogos.some(jogo => JSON.stringify(jogo) === JSON.stringify(escolhidas))) {
+          jogos.push(escolhidas);
+        }
+      }
+
+      let html = `<h3>🎯 ${qtd} Combinações Prováveis</h3>`;
+      jogos.forEach((jogo,i)=>{
+        html += `<div class="jogo"><b>Jogo ${i+1}:</b> <div class="dezenas">
+          ${jogo.map(d=>`<div class="dezena destacada">${String(d).padStart(2,'0')}</div>`).join('')}
+        </div></div>`;
+      });
+
+      html += `<p style="font-size:12px;color:#777">Baseadas em distribuição ponderada (frequência × correlação).</p>`;
+      const div = document.getElementById("comboProb");
+      div.style.display = "block";
+      div.innerHTML = html;
+    }
+
+    // === VISUAL ===
+    function exibirEstatisticas(stats, max) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      let html = `<h2>📈 Frequência das Dezenas</h2><div class="stats">`;
+      stats.forEach((c, i) => {
+        const cls = (dezenaDestaque && (i+1) === dezenaDestaque) ? 'stat-item destacada' : 'stat-item';
+        html += `<div class="${cls}"><div style="font-size:18px; font-weight:bold;">${String(i+1).padStart(2,'0')}</div><div>${c} vez${c!==1?'es':''}</div></div>`;
+      });
+      html += `</div>`;
+      document.getElementById('estatisticas').innerHTML = html;
+    }
+
+    function exibirResultados(sorteios, max) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      let html = `<h2>🎯 Resultados Oficiais</h2><table><tr><th>Concurso</th><th>Data</th><th>Dezenas</th></tr>`;
+      sorteios.forEach(s => {
+        html += `<tr><td>${s.concurso}</td><td>${s.data}</td><td><div class="dezenas">`;
+        html += s.dezenas.map(d => {
+          const cls = (dezenaDestaque && d === dezenaDestaque) ? 'dezena destacada' : 'dezena';
+          return `<div class="${cls}">${String(d).padStart(2,'0')}</div>`;
+        }).join('');
+        html += `</div></td></tr>`;
+      });
+      html += `</table>`;
+      document.getElementById('tabelaResultados').innerHTML = html;
+    }
+
+    function exibirGrafico(stats, cfg) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      const canvas = document.getElementById('grafico');
+      canvas.width = cfg.max * 25;
+      canvas.height = cfg.max <= 25 ? 120 : 200;
+
+      const ctx = canvas.getContext('2d');
+      const labels = stats.map((_, i) => String(i+1).padStart(2,'0'));
+      const colors = stats.map((_, i) => (dezenaDestaque && (i+1) === dezenaDestaque) ? '#ff5722' : '#2196f3');
+
+      if (chartGrafico) chartGrafico.destroy();
+
+      chartGrafico = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Frequência', data: stats, backgroundColor: colors }] },
+        options: { responsive: false, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function atualizarDestaque() {
+      exibirEstatisticas(statsGlobais, cfgAtual.max);
+      exibirResultados(ultimosSorteios, cfgAtual.max);
+      exibirGrafico(statsGlobais, cfgAtual);
+      exibirAnaliseProbabilistica(ultimosSorteios, cfgAtual);
+    }
+
+    window.addEventListener('load', carregarDados);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
+  </script>
+</body>
+</html>
+
