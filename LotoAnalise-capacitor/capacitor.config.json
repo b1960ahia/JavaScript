@@ -1,0 +1,8 @@
+{
+  "appId": "com.loto.analise",
+  "appName": "Loterias — Analisador",
+  "webDir": "../LotoAnalise",
+  "server": {
+    "androidScheme": "https"
+  }
+}

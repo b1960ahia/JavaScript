@@ -1,0 +1,16 @@
+{
+  "name": "icons",
+  "version": "1.0.0",
+  "main": "make-icons.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "jimp": "^1.6.0",
+    "pureimage": "^0.4.18"
+  }
+}
