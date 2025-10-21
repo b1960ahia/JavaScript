@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Loterias Análise (PWA)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Analise estatísticas e resultados das principais loterias da Caixa">
+  <meta name="theme-color" content="#2196f3">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Ícones PWA -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
+  
+  <style>
+    :root {
+      --primary: #2196f3;
+      --primary-dark: #1976d2;
+      --secondary: #ff5722;
+      --light: #f5f5f5;
+      --dark: #333;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --shadow: 0 2px 10px rgba(0,0,0,0.1);
+      --radius: 8px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f9f9f9;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 20px 0;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .filters {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+    
+    select, input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: var(--radius);
+      font-size: 1rem;
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s;
+      align-self: end;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+    
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      background-color: #ffebee;
+      color: var(--danger);
+      padding: 15px;
+      border-radius: var(--radius);
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .stats-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .stat-item {
+      background: #e3f2fd;
+      padding: 10px;
+      text-align: center;
+      border-radius: var(--radius);
+      transition: transform 0.2s;
+    }
+    
+    .stat-item:hover {
+      transform: translateY(-3px);
+    }
+    
+    .stat-item.destacada {
+      background: var(--secondary);
+      color: #fff;
+      font-weight: bold;
+    }
+    
+    .chart-container {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    
+    .table-container {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+    
+    th {
+      background: var(--primary);
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .dezenas {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .dezena {
+      background: var(--primary);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .dezena.destacada {
+      background: var(--secondary) !important;
+      transform: scale(1.1);
+    }
+    
+    .summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 15px 0;
+    }
+    
+    .summary-item {
+      background: #f5f5f5;
+      padding: 10px 15px;
+      border-radius: var(--radius);
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+    }
+    
+    .summary-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    
+    .summary-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+      
+      .filters {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      }
+      
+      .dezena {
+        width: 25px;
+        height: 25px;
+        font-size: 10px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+      }
+      
+      .stat-item {
+        padding: 8px 5px;
+      }
+    }
+  </style>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <h1>🎰 Loterias — Análise de Dados Oficiais</h1>
+        <div class="summary" id="resumo">
+          <!-- Será preenchido dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="filters">
+      <div class="filter-group">
+        <label for="tipoLoteria">Loteria:</label>
+        <select id="tipoLoteria" onchange="atualizarFiltros()">
+          <option value="lotofacil">Lotofácil</option>
+          <option value="megasena">Mega-Sena</option>
+          <option value="quina">Quina</option>
+          <option value="lotomania">Lotomania</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="concursoInicio">Concurso Inicial:</label>
+        <input type="number" id="concursoInicio" min="1">
+      </div>
+      
+      <div class="filter-group">
+        <label for="concursoFim">Concurso Final:</label>
+        <input type="number" id="concursoFim" min="1">
+      </div>
+      
+      <div class="filter-group">
+        <label for="dezenaDestaque">Destacar dezena:</label>
+        <input type="number" id="dezenaDestaque" min="1" max="100" style="width:100%" oninput="atualizarDestaque()">
+      </div>
+      
+      <div class="filter-group">
+        <label>&nbsp;</label>
+        <button id="btnAtualizar" onclick="carregarDados()">Atualizar Dados</button>
+      </div>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">
+      <div class="spinner"></div>
+      <p>Carregando dados...</p>
+    </div>
+
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+    <div id="estatisticas" class="stats-section"></div>
+    
+    <div class="chart-container">
+      <canvas id="grafico"></canvas>
+    </div>
+    
+    <div class="table-container">
+      <div id="tabelaResultados"></div>
+    </div>
+  </div>
+
+  <script>
+    // Variáveis globais
+    let chartGrafico = null;
+    let statsGlobais = [];
+    let cfgAtual = null;
+    let dadosAtuais = [];
+    
+    // Configurações das loterias
+    const cfgLoterias = {
+      lotofacil:  {nome:"Lotofácil",  max:25,  api:"lotofacil", dezenasSorteadas: 15},
+      megasena:   {nome:"Mega-Sena",  max:60,  api:"megasena", dezenasSorteadas: 6},
+      quina:      {nome:"Quina",      max:80,  api:"quina", dezenasSorteadas: 5},
+      lotomania:  {nome:"Lotomania",  max:100, api:"lotomania", dezenasSorteadas: 20}
+    };
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+      // Registrar service worker para PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registrado'))
+          .catch(err => console.log('Erro ao registrar Service Worker:', err));
+      }
+      
+      // Carregar dados iniciais
+      carregarDados();
+    });
+
+    // Atualizar limites dos filtros quando a loteria mudar
+    function atualizarFiltros() {
+      const tipoSel = document.getElementById('tipoLoteria').value;
+      cfgAtual = cfgLoterias[tipoSel];
+      
+      // Atualizar max da dezena de destaque
+      const dezenaInput = document.getElementById('dezenaDestaque');
+      dezenaInput.max = cfgAtual.max;
+      
+      // Limpar campos de concurso para forçar recálculo
+      document.getElementById('concursoInicio').value = '';
+      document.getElementById('concursoFim').value = '';
+    }
+
+    // Buscar dados de um concurso específico
+    async function fetchConcurso(tipo, numero) {
+      const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}/${numero}`;
+      const resp = await fetch(url, {
+        headers: {
+          "Accept": "application/json, text/plain, */*",
+          "Origin": "https://loterias.caixa.gov.br",
+          "Referer": "https://loterias.caiza.gov.br/",
+        }
+      });
+      
+      if (!resp.ok) {
+        throw new Error(`Erro ao buscar concurso ${numero}: ${resp.status}`);
+      }
+      
+      return await resp.json();
+    }
+
+    // Buscar o último concurso disponível
+    async function fetchUltimoConcurso(tipo) {
+      const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}`;
+      const resp = await fetch(url, {
+        headers: {
+          "Accept": "application/json, text/plain, */*",
+          "Origin": "https://loterias.caixa.gov.br",
+          "Referer": "https://loterias.caixa.gov.br/",
+        }
+      });
+      
+      if (!resp.ok) {
+        throw new Error(`Erro ao buscar último concurso: ${resp.status}`);
+      }
+      
+      return await resp.json();
+    }
+
+    // Função principal para carregar dados
+    async function carregarDados() {
+      try {
+        // Mostrar loading
+        mostrarLoading(true);
+        esconderErro();
+        
+        const tipoSel = document.getElementById('tipoLoteria').value;
+        cfgAtual = cfgLoterias[tipoSel];
+        let inicio = parseInt(document.getElementById('concursoInicio').value);
+        let fim = parseInt(document.getElementById('concursoFim').value);
+
+        // Se não especificou concursos, buscar os últimos 20
+        if (!inicio || !fim) {
+          const ultimo = await fetchUltimoConcurso(cfgAtual.api);
+          fim = ultimo.numero;
+          inicio = Math.max(1, fim - 19); // Garantir que não seja menor que 1
+          document.getElementById('concursoFim').value = fim;
+          document.getElementById('concursoInicio').value = inicio;
+        }
+
+        // Validações
+        if (inicio > fim) {
+          throw new Error("Concurso inicial não pode ser maior que o final.");
+        }
+        
+        if (fim - inicio > 100) {
+          throw new Error("O intervalo máximo permitido é de 100 concursos.");
+        }
+
+        // Buscar dados dos concursos
+        const resultados = [];
+        for (let n = inicio; n <= fim; n++) {
+          try {
+            const dado = await fetchConcurso(cfgAtual.api, n);
+            resultados.push(dado);
+          } catch (err) {
+            console.warn("Falha no concurso:", n, err);
+          }
+        }
+
+        // Processar dados
+        const sorteios = resultados.map(d => ({
+          concurso: d.numero,
+          data: formatarData(d.dataApuracao),
+          dezenas: d.listaDezenas.map(x => parseInt(x,10)).sort((a,b)=>a-b)
+        }));
+
+        dadosAtuais = sorteios;
+        statsGlobais = calcularEstatisticas(sorteios, cfgAtual.max);
+        
+        // Atualizar interface
+        exibirResumo(sorteios, cfgAtual);
+        exibirEstatisticas(statsGlobais, cfgAtual.max);
+        exibirResultados(sorteios, cfgAtual.max);
+        exibirGrafico(statsGlobais, cfgAtual);
+
+      } catch (e) {
+        console.error("Erro ao carregar dados:", e);
+        mostrarErro(e.message);
+      } finally {
+        mostrarLoading(false);
+      }
+    }
+
+    // Calcular estatísticas de frequência
+    function calcularEstatisticas(dados, max) {
+      const stats = Array(max).fill(0);
+      dados.forEach(s => {
+        s.dezenas.forEach(d => {
+          stats[d-1]++;
+        });
+      });
+      return stats;
+    }
+
+    // Exibir resumo dos dados
+    function exibirResumo(dados, cfg) {
+      const totalConcursos = dados.length;
+      const dezenaMaisFrequente = statsGlobais.indexOf(Math.max(...statsGlobais)) + 1;
+      const dezenaMenosFrequente = statsGlobais.indexOf(Math.min(...statsGlobais)) + 1;
+      
+      let html = `
+        <div class="summary-item">
+          <div class="summary-value">${totalConcursos}</div>
+          <div class="summary-label">Concursos</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">${cfg.dezenasSorteadas}</div>
+          <div class="summary-label">Dezenas por sorteio</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">${String(dezenaMaisFrequente).padStart(2,'0')}</div>
+          <div class="summary-label">Mais frequente</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">${String(dezenaMenosFrequente).padStart(2,'0')}</div>
+          <div class="summary-label">Menos frequente</div>
+        </div>
+      `;
+      
+      document.getElementById('resumo').innerHTML = html;
+    }
+
+    // Exibir estatísticas de frequência
+    function exibirEstatisticas(stats, max) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      let html = `<h2>📈 Frequência das Dezenas</h2><div class="stats">`;
+      
+      stats.forEach((c, i) => {
+        const cls = (dezenaDestaque && (i+1) === dezenaDestaque) ? 'stat-item destacada' : 'stat-item';
+        html += `
+          <div class="${cls}">
+            <div style="font-size:18px; font-weight:bold;">${String(i+1).padStart(2,'0')}</div>
+            <div>${c} vez${c!==1?'es':''}</div>
+          </div>
+        `;
+      });
+      
+      html += `</div>`;
+      document.getElementById('estatisticas').innerHTML = html;
+    }
+
+    // Exibir tabela de resultados
+    function exibirResultados(sorteios, max) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      let html = `
+        <h2>🎯 Resultados Oficiais</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Concurso</th>
+              <th>Data</th>
+              <th>Dezenas Sorteadas</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      sorteios.forEach(s => {
+        html += `
+          <tr>
+            <td>${s.concurso}</td>
+            <td>${s.data}</td>
+            <td><div class="dezenas">
+        `;
+        
+        html += s.dezenas.map(d => {
+          const cls = (dezenaDestaque && d === dezenaDestaque) ? 'dezena destacada' : 'dezena';
+          return `<div class="${cls}">${String(d).padStart(2,'0')}</div>`;
+        }).join('');
+        
+        html += `</div></td></tr>`;
+      });
+      
+      html += `</tbody></table>`;
+      document.getElementById('tabelaResultados').innerHTML = html;
+    }
+
+    // Exibir gráfico de barras
+    function exibirGrafico(stats, cfg) {
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      const canvas = document.getElementById('grafico');
+      const ctx = canvas.getContext('2d');
+      
+      const labels = stats.map((_, i) => String(i+1).padStart(2,'0'));
+      const colors = stats.map((_, i) => {
+        return (dezenaDestaque && (i+1) === dezenaDestaque) ? '#ff5722' : '#2196f3';
+      });
+
+      // Destruir gráfico anterior se existir
+      if (chartGrafico) {
+        chartGrafico.destroy();
+      }
+
+      // Criar novo gráfico
+      chartGrafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Frequência',
+            data: stats,
+            backgroundColor: colors,
+            borderColor: colors.map(c => c.replace('0.8', '1')),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Dezena ${context.label}: ${context.raw} vez${context.raw !== 1 ? 'es' : ''}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Quantidade de Sorteios'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Dezenas'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Atualizar destaque nas visualizações
+    function atualizarDestaque() {
+      if (!cfgAtual) return;
+      
+      const dezenaDestaque = parseInt(document.getElementById('dezenaDestaque').value);
+      
+      // Validar entrada
+      if (dezenaDestaque && (dezenaDestaque < 1 || dezenaDestaque > cfgAtual.max)) {
+        document.getElementById('dezenaDestaque').value = '';
+        return;
+      }
+      
+      exibirEstatisticas(statsGlobais, cfgAtual.max);
+      exibirResultados(dadosAtuais, cfgAtual.max);
+      exibirGrafico(statsGlobais, cfgAtual);
+    }
+
+    // Utilitários de UI
+    function mostrarLoading(mostrar) {
+      document.getElementById('loading').style.display = mostrar ? 'block' : 'none';
+      document.getElementById('btnAtualizar').disabled = mostrar;
+    }
+
+    function mostrarErro(mensagem) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = mensagem;
+      errorDiv.style.display = 'block';
+    }
+
+    function esconderErro() {
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+
+    function formatarData(dataString) {
+      const data = new Date(dataString);
+      return data.toLocaleDateString('pt-BR');
+    }
+  </script>
+</body>
+</html>
