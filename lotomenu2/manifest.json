@@ -1,11 +1,36 @@
 {
-  "name": "Loterias Análise",
+  "name": "Loterias — Analisador Avançado",
   "short_name": "Loterias",
-  "start_url": "/JavaScript/LotoMenu/lotomenu.html",
+  "start_url": "/JavaScript/LotoAnalise/aprimorandoanaliseloterias.html",
+  "scope": "/JavaScript/LotoAnalise/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196f3",
   "icons": [
+    {
+      "src": "/JavaScript/LotoAnalise/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/JavaScript/LotoAnalise/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/JavaScript/LotoAnalise/icone-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/JavaScript/LotoAnalise/icone-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/JavaScript/LotoMenu/icone-192.png",
       "sizes": "192x192",
@@ -18,5 +43,3 @@
     }
   ]
 }
-
-
