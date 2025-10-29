@@ -3,6 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Loterias — Analisador Avançado (PWA)</title>
+  <!-- PWA Meta Tags -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Analisador Loterias">
+<link rel="apple-touch-icon" href="icone-192.png">
+
+<!-- Theme Color para diferentes navegadores -->
+<meta name="theme-color" content="#2196f3">
+<meta name="msapplication-navbutton-color" content="#2196f3">
+<meta name="apple-mobile-web-app-status-bar-style" content="#2196f3">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2196f3">
@@ -918,6 +929,58 @@
       try { navigator.serviceWorker.register('service-worker.js'); } catch(e){console.warn('SW reg fail',e);}    }
     try { await carregarIntervalo(); } catch(e) { console.warn('preload fail', e); }
   })();
+
+  // Registro do Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(function(registration) {
+        console.log('ServiceWorker registrado com sucesso: ', registration.scope);
+        
+        // Verifica se há uma nova versão disponível
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('Nova versão do Service Worker encontrada!');
+          
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Nova versão disponível, mostrar notificação para atualizar
+              if (confirm('Nova versão disponível! Deseja atualizar?')) {
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+              }
+            }
+          });
+        });
+      })
+      .catch(function(error) {
+        console.log('Falha no registro do ServiceWorker: ', error);
+      });
+  });
+
+  // Ouvinte para atualizações
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+}
+
+// Função para verificar se o app está instalado
+function checkPWAInstall() {
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                     window.navigator.standalone ||
+                     document.referrer.includes('android-app://');
+  
+  if (isInstalled) {
+    console.log('App executando como PWA instalado');
+  }
+}
+
+// Verifica na carga inicial
+checkPWAInstall();
 
   </script>
 </body>
