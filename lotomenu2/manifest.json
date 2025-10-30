@@ -1,15 +1,13 @@
 {
-  "name": "Loterias — Analisador Avançado",
-  "short_name": "Analisador Loterias",
-  "description": "Aplicativo avançado para análise estatística de loterias brasileiras",
+  "name": "Analisador de Loterias",
+  "short_name": "Loterias App",
+  "description": "Aplicativo avançado para análise de loterias brasileiras",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fbfbfd",
+  "background_color": "#2196f3",
   "theme_color": "#2196f3",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "scope": "/",
-  "lang": "pt-BR",
-  "categories": ["finance", "utilities"],
   "icons": [
     {
       "src": "icone-192.png",
@@ -24,18 +22,5 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "screenshot-narrow.png",
-      "sizes": "375x667",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ]
+  "categories": ["finance", "productivity"]
 }
