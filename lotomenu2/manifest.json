@@ -1,20 +1,24 @@
 {
-  "name": "Análise JB Loto",
+  "name": "Analise JB Loto",
   "short_name": "JB Loto",
-  "start_url": "/JavaScript/LotoMenu/analisededados.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196f3",
+  "description": "Análise estatística para loterias",
   "icons": [
     {
-      "src": "/JavaScript/LotoMenu/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/JavaScript/LotoMenu/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["entertainment", "utilities"]
 }

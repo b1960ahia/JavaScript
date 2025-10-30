@@ -1,24 +1,43 @@
-const CACHE_NAME = 'loterias-cache-v1';
+const CACHE_NAME = 'jb-loto-v2';
 const urlsToCache = [
-  '/JavaScript/LotoMenu/analisededados.html',
-  '/JavaScript/LotoMenu/manifest.json',
-  '/JavaScript/LotoMenu/icon-192.png',
-  '/JavaScript/LotoMenu/icon-512.png',
-  '/JavaScript/LotoMenu/service-worker.js'
+  './',
+  './analisededados.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then(resp => {
-      return resp || fetch(event.request);
+    caches.match(event.request)
+      .then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      }
+    )
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
     })
   );
 });
