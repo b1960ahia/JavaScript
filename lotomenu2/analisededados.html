@@ -1,5 +1,4 @@
-# Writing the complete corrected HTML file for the user and saving it to /mnt/data
-html = r"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
@@ -7,8 +6,55 @@ html = r"""<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2196f3">
+  <!-- PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="JB Loto">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileColor" content="#2196f3">
+<meta name="msapplication-TileImage" content="/icon-144x144.png">
+<meta name="msapplication-config" content="/browserconfig.xml">
+<meta name="application-name" content="JB Loto">
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" href="/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-192x192.png">
+<link rel="apple-touch-icon" sizes="167x167" href="/icon-152x152.png">
+
+<!-- Splash Screens (opcional) -->
+<link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
   <style>
     /* (mantive seu CSS, pequenos ajustes visuais) */
+    /* Estilos específicos para PWA */
+.pwa-mode body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Melhorar visualização em mobile quando instalado */
+@media (display-mode: standalone) {
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  
+  .container {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+}
+
+/* Prevenir zoom em inputs em iOS */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
     body { font-family: Arial, sans-serif; margin: 16px; background:#fbfbfd; color:#111; }
     .container { max-width:1200px; margin:0 auto; }
     h1 { margin-bottom:8px; }
@@ -221,13 +267,13 @@ html = r"""<!DOCTYPE html>
   }
 
   /*************************************************************************
-   *  Config Loterias
+   *  Config Loterias - CORREÇÃO PARA LOTOMANIA
    *************************************************************************/
   const cfgLoterias = {
     lotofacil: { nome: 'Lotofácil', max:25, api:'lotofacil', defaultSize:15 },
     megasena:  { nome: 'Mega-Sena', max:60, api:'megasena', defaultSize:6 },
     quina:     { nome: 'Quina', max:80, api:'quina', defaultSize:5 },
-    lotomania: { nome: 'Lotomania', max:100, api:'lotomania', defaultSize:50 }
+    lotomania: { nome: 'Lotomania', max:100, api:'lotomania', defaultSize:20 } // CORREÇÃO: 20 números sorteados, não 50
   };
 
   let cfgAtual = cfgLoterias['megasena'];
@@ -293,43 +339,94 @@ html = r"""<!DOCTYPE html>
   let chartInstance = null;
 
   /*************************************************************************
-   *  Fetch helpers (Caixa API) - com tratamento de formatos inconsistentes
+   *  Fetch helpers (Caixa API) - CORREÇÃO ESPECÍFICA PARA LOTOMANIA
    *************************************************************************/
   async function fetchConcurso(tipoApi, numero) {
     const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipoApi}/${numero}`;
     try {
       const resp = await fetch(url, { headers: { "Accept": "application/json, text/plain, */*" } });
       if (!resp.ok) {
-        // 404 possivelmente concurso inexistente → retornar null e continuar
         console.warn(`fetchConcurso ${tipoApi}/${numero} -> ${resp.status}`);
         return null;
       }
       const raw = await resp.json();
-      // formatos podem variar: listaDezenas, listaDezenasOrd, dezenas, etc.
-      let dezenas = null;
-      if (raw.listaDezenas && Array.isArray(raw.listaDezenas)) dezenas = raw.listaDezenas;
-      else if (raw.dezenas && Array.isArray(raw.dezenas)) dezenas = raw.dezenas;
-      else if (raw.listaDezenasOrd && Array.isArray(raw.listaDezenasOrd)) dezenas = raw.listaDezenasOrd;
-      else if (raw.dezenasSorteadasOrdemSorteio && Array.isArray(raw.dezenasSorteadasOrdemSorteio)) dezenas = raw.dezenasSorteadasOrdemSorteio;
-      else if (raw.listaDezenasSorteadas && Array.isArray(raw.listaDezenasSorteadas)) dezenas = raw.listaDezenasSorteadas;
-
-      // fallback: tentar extrair campos numéricos no objeto
-      if (!dezenas) {
-        for (const k in raw) {
-          if (Array.isArray(raw[k]) && raw[k].length > 0) {
-            // verificar se os itens são números ou strings numéricas
-            const allNum = raw[k].every(v => (typeof v === 'number') || (typeof v === 'string' && /^\d+$/.test(v)));
-            if (allNum) { dezenas = raw[k]; break; }
+      
+      // TRATAMENTO ESPECÍFICO PARA LOTOMANIA
+      if (tipoApi === 'lotomania') {
+        let dezenas = null;
+        
+        // Tentar diferentes formatos possíveis para Lotomania
+        if (raw.listaDezenas && Array.isArray(raw.listaDezenas)) {
+          dezenas = raw.listaDezenas;
+        } else if (raw.dezenas && Array.isArray(raw.dezenas)) {
+          dezenas = raw.dezenas;
+        } else if (raw.listaDezenasOrd && Array.isArray(raw.listaDezenasOrd)) {
+          dezenas = raw.listaDezenasOrd;
+        } else if (raw.dezenasSorteadasOrdemSorteio && Array.isArray(raw.dezenasSorteadasOrdemSorteio)) {
+          dezenas = raw.dezenasSorteadasOrdemSorteio;
+        } else if (raw.listaDezenasSorteadas && Array.isArray(raw.listaDezenasSorteadas)) {
+          dezenas = raw.listaDezenasSorteadas;
+        }
+        
+        // Fallback: buscar qualquer array com números
+        if (!dezenas) {
+          for (const k in raw) {
+            if (Array.isArray(raw[k]) && raw[k].length > 0) {
+              const allNum = raw[k].every(v => (typeof v === 'number') || (typeof v === 'string' && /^\d+$/.test(v)));
+              if (allNum) { 
+                dezenas = raw[k]; 
+                break; 
+              }
+            }
           }
         }
-      }
 
-      if (!dezenas) {
-        console.warn('Formato inesperado para', tipoApi, numero, raw);
-        return null;
-      }
+        if (!dezenas) {
+          console.warn('Formato inesperado para Lotomania', numero, raw);
+          return null;
+        }
 
-      return { numero: raw.numero || numero, dataApuracao: raw.dataApuracao || raw.data || raw.dataSorteio || null, listaDezenas: dezenas };
+        // CONVERSÃO ESPECÍFICA PARA LOTOMANIA: números de 0-99
+        const dezenasConvertidas = dezenas.map(d => {
+          const num = parseInt(d, 10);
+          // Lotomania usa números de 0 a 99, converter para 1-100 se necessário
+          return num >= 0 && num <= 99 ? num : num;
+        }).filter(d => !isNaN(d));
+
+        return { 
+          numero: raw.numero || numero, 
+          dataApuracao: raw.dataApuracao || raw.data || raw.dataSorteio || null, 
+          listaDezenas: dezenasConvertidas 
+        };
+      } else {
+        // CÓDIGO ORIGINAL PARA OUTRAS LOTERIAS
+        let dezenas = null;
+        if (raw.listaDezenas && Array.isArray(raw.listaDezenas)) dezenas = raw.listaDezenas;
+        else if (raw.dezenas && Array.isArray(raw.dezenas)) dezenas = raw.dezenas;
+        else if (raw.listaDezenasOrd && Array.isArray(raw.listaDezenasOrd)) dezenas = raw.listaDezenasOrd;
+        else if (raw.dezenasSorteadasOrdemSorteio && Array.isArray(raw.dezenasSorteadasOrdemSorteio)) dezenas = raw.dezenasSorteadasOrdemSorteio;
+        else if (raw.listaDezenasSorteadas && Array.isArray(raw.listaDezenasSorteadas)) dezenas = raw.listaDezenasSorteadas;
+
+        if (!dezenas) {
+          for (const k in raw) {
+            if (Array.isArray(raw[k]) && raw[k].length > 0) {
+              const allNum = raw[k].every(v => (typeof v === 'number') || (typeof v === 'string' && /^\d+$/.test(v)));
+              if (allNum) { dezenas = raw[k]; break; }
+            }
+          }
+        }
+
+        if (!dezenas) {
+          console.warn('Formato inesperado para', tipoApi, numero, raw);
+          return null;
+        }
+
+        return { 
+          numero: raw.numero || numero, 
+          dataApuracao: raw.dataApuracao || raw.data || raw.dataSorteio || null, 
+          listaDezenas: dezenas 
+        };
+      }
     } catch (err) {
       console.warn('Erro fetchConcurso', url, err);
       return null;
@@ -354,10 +451,8 @@ html = r"""<!DOCTYPE html>
       let inicio = parseInt(inicioInput.value);
       let fim = parseInt(fimInput.value);
 
-      // opção "últimos N"
       const ultN = parseInt(ultimosNInput.value) || 0;
 
-      // se não informado, pega últimos N ou últimos 20 por default
       if ((!inicio || !fim) && ultN) {
         const ultimo = await fetchUltimoConcurso(cfgAtual.api);
         fim = ultimo.numero;
@@ -374,7 +469,6 @@ html = r"""<!DOCTYPE html>
 
       if (inicio > fim) { alert('Concurso início > concurso fim'); return; }
 
-      // Carrega cada concurso, priorizando cache
       loadingText.innerText = `Buscando concursos ${inicio} → ${fim} ...`;
       progressWrap.style.display = 'block';
       progressBar.style.width = '0%';
@@ -389,13 +483,38 @@ html = r"""<!DOCTYPE html>
           const raw = await fetchConcurso(cfgAtual.api, n);
           if (raw) {
             data = { numero: raw.numero, dataApuracao: raw.dataApuracao, listaDezenas: raw.listaDezenas };
-            try { await idbPut(key, data); } catch(e){ /* continue mesmo se falhar em salvar cache */ }
+            try { await idbPut(key, data); } catch(e){ }
           } else {
             data = null;
           }
         }
         if (data && Array.isArray(data.listaDezenas)) {
-          arr.push({ concurso: data.numero, data: data.dataApuracao, dezenas: data.listaDezenas.map(x=>parseInt(x,10)).sort((a,b)=>a-b) });
+          // TRATAMENTO ESPECIAL PARA LOTOMANIA - converter números
+          let dezenasProcessadas;
+          if (cfgAtual.api === 'lotomania') {
+            // Lotomania: números de 0-99, garantir que estão no range correto
+            dezenasProcessadas = data.listaDezenas
+              .map(x => {
+                const num = parseInt(x, 10);
+                return isNaN(num) ? null : num;
+              })
+              .filter(x => x !== null && x >= 0 && x <= 99)
+              .sort((a, b) => a - b);
+          } else {
+            // Outras loterias: números de 1 em diante
+            dezenasProcessadas = data.listaDezenas
+              .map(x => parseInt(x, 10))
+              .filter(x => !isNaN(x) && x >= 1 && x <= cfgAtual.max)
+              .sort((a, b) => a - b);
+          }
+          
+          if (dezenasProcessadas.length > 0) {
+            arr.push({ 
+              concurso: data.numero, 
+              data: data.dataApuracao, 
+              dezenas: dezenasProcessadas 
+            });
+          }
         }
         loaded++;
         progressBar.style.width = `${Math.round((loaded/total)*100)}%`;
@@ -413,7 +532,6 @@ html = r"""<!DOCTYPE html>
     }
   }
 
-  // Filtrar por data (busca todos concursos em cache / online que caibam no intervalo)
   async function filtrarPorData() {
     const di = dataInicio.value;
     const df = dataFim.value;
@@ -422,7 +540,6 @@ html = r"""<!DOCTYPE html>
     const end = new Date(df);
     if (start > end) { alert('Data início maior que fim'); return; }
 
-    // Busca chaves do cache para esse tipo e filtra por data; se não tiver tudo, consulta últimos e filtra
     cfgAtual = cfgLoterias[tipoSel.value];
     const keys = await idbKeysPrefix(cfgAtual.api + ':');
     let arr = [];
@@ -430,10 +547,34 @@ html = r"""<!DOCTYPE html>
       const val = await idbGet(k);
       if (!val) continue;
       const d = new Date(val.dataApuracao);
-      if (d >= start && d <= end) arr.push({ concurso: val.numero, data: val.dataApuracao, dezenas: val.listaDezenas.map(x=>parseInt(x,10)).sort((a,b)=>a-b) });
+      if (d >= start && d <= end) {
+        // APLICAR MESMO TRATAMENTO DE CONVERSÃO
+        let dezenasProcessadas;
+        if (cfgAtual.api === 'lotomania') {
+          dezenasProcessadas = val.listaDezenas
+            .map(x => {
+              const num = parseInt(x, 10);
+              return isNaN(num) ? null : num;
+            })
+            .filter(x => x !== null && x >= 0 && x <= 99)
+            .sort((a, b) => a - b);
+        } else {
+          dezenasProcessadas = val.listaDezenas
+            .map(x => parseInt(x, 10))
+            .filter(x => !isNaN(x) && x >= 1 && x <= cfgAtual.max)
+            .sort((a, b) => a - b);
+        }
+        
+        if (dezenasProcessadas.length > 0) {
+          arr.push({ 
+            concurso: val.numero, 
+            data: val.dataApuracao, 
+            dezenas: dezenasProcessadas 
+          });
+        }
+      }
     }
 
-    // Se cache não tem nada no periodo, tentamos buscar últimos 400 concursos e filtrar online
     if (arr.length === 0) {
       const ultimo = await fetchUltimoConcurso(cfgAtual.api);
       const fim = ultimo.numero;
@@ -446,11 +587,38 @@ html = r"""<!DOCTYPE html>
       for (let n = inicio; n <= fim; n++) {
         let raw = await idbGet(cacheKey(cfgAtual.api, n));
         if (!raw) {
-          try { raw = await fetchConcurso(cfgAtual.api, n); if (raw) await idbPut(cacheKey(cfgAtual.api, n), raw); } catch(e) {}
+          try { 
+            raw = await fetchConcurso(cfgAtual.api, n); 
+            if (raw) await idbPut(cacheKey(cfgAtual.api, n), raw); 
+          } catch(e) {}
         }
         if (raw) {
           const dd = new Date(raw.dataApuracao);
-          if (dd >= start && dd <= end) temp.push({ concurso: raw.numero, data: raw.dataApuracao, dezenas: raw.listaDezenas.map(x=>parseInt(x,10)).sort((a,b)=>a-b) });
+          if (dd >= start && dd <= end) {
+            let dezenasProcessadas;
+            if (cfgAtual.api === 'lotomania') {
+              dezenasProcessadas = raw.listaDezenas
+                .map(x => {
+                  const num = parseInt(x, 10);
+                  return isNaN(num) ? null : num;
+                })
+                .filter(x => x !== null && x >= 0 && x <= 99)
+                .sort((a, b) => a - b);
+            } else {
+              dezenasProcessadas = raw.listaDezenas
+                .map(x => parseInt(x, 10))
+                .filter(x => !isNaN(x) && x >= 1 && x <= cfgAtual.max)
+                .sort((a, b) => a - b);
+            }
+            
+            if (dezenasProcessadas.length > 0) {
+              temp.push({ 
+                concurso: raw.numero, 
+                data: raw.dataApuracao, 
+                dezenas: dezenasProcessadas 
+              });
+            }
+          }
         }
         loaded++;
         progressBar.style.width = `${Math.round((loaded/(fim-inicio+1))*100)}%`;
@@ -465,7 +633,6 @@ html = r"""<!DOCTYPE html>
     atualizarCacheStatus();
   }
 
-  // Busca TODOS os concursos (1 -> ultimo) e faz cache progressivo
   async function fetchAllConcursos() {
     if (!confirm('Isto irá baixar muitos concursos (um por um) e armazenar em seu navegador. Deseja continuar?')) return;
     cfgAtual = cfgLoterias[tipoSel.value];
@@ -474,7 +641,7 @@ html = r"""<!DOCTYPE html>
     const inicio = 1;
     loadingText.innerText = `Baixando todos os concursos 1 → ${fim} (cache progressivo). Pode demorar.`;
     progressWrap.style.display = 'block';
-    const batch = 25; // ajustar conforme necessidade
+    const batch = 25;
     let loaded = 0;
 
     for (let s = inicio; s <= fim; s += batch) {
@@ -488,7 +655,6 @@ html = r"""<!DOCTYPE html>
               const raw = await fetchConcurso(cfgAtual.api, n);
               if (raw) await idbPut(key, { numero: raw.numero, dataApuracao: raw.dataApuracao, listaDezenas: raw.listaDezenas });
             } catch (err) {
-              // ignorar erro, continuar
             }
           }
         })());
@@ -509,7 +675,7 @@ html = r"""<!DOCTYPE html>
   }
 
   /*************************************************************************
-   *  Processamento de dados: frequências, coocorrências, scores
+   *  Processamento de dados - CORREÇÃO PARA LOTOMANIA
    *************************************************************************/
   function processarDadosEExibir() {
     if (!ultimosSorteios || ultimosSorteios.length === 0) {
@@ -521,6 +687,7 @@ html = r"""<!DOCTYPE html>
       if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
       return;
     }
+    
     const N = cfgAtual.max;
     const freq = Array(N).fill(0);
     const matrix = Array.from({length:N}, ()=>Array(N).fill(0));
@@ -528,17 +695,26 @@ html = r"""<!DOCTYPE html>
 
     ultimosSorteios.forEach(s => {
       s.dezenas.forEach(d1 => {
-        freq[d1-1]++;
-        s.dezenas.forEach(d2 => {
-          if (d1 !== d2) matrix[d1-1][d2-1]++;
-        });
+        // AJUSTE PARA LOTOMANIA: números de 0-99 vs índice 0-99
+        const idx1 = cfgAtual.api === 'lotomania' ? d1 : d1 - 1;
+        if (idx1 >= 0 && idx1 < N) {
+          freq[idx1]++;
+          s.dezenas.forEach(d2 => {
+            if (d1 !== d2) {
+              const idx2 = cfgAtual.api === 'lotomania' ? d2 : d2 - 1;
+              if (idx2 >= 0 && idx2 < N) {
+                matrix[idx1][idx2]++;
+              }
+            }
+          });
+        }
       });
     });
 
     statsGlobais = freq;
     coocMatrix = matrix;
 
-    // scores por dezena: freq * associação média (como definido antes)
+    // scores por dezena
     const p = freq.map(f => f / total);
     const p2 = matrix.map(l => l.map(v => v/total));
     const associacao = Array(N).fill(0);
@@ -552,7 +728,6 @@ html = r"""<!DOCTYPE html>
     const scores = freq.map((f,i) => f * associacao[i]);
     ultimoScores = scores;
 
-    // exibir: estatísticas e tabela de resultados
     renderEstatisticas(freq);
     renderResultados(ultimosSorteios);
     renderGrafico(freq);
@@ -561,13 +736,17 @@ html = r"""<!DOCTYPE html>
   }
 
   /*************************************************************************
-   *  Renderers
+   *  Renderers - CORREÇÃO PARA EXIBIÇÃO LOTOMANIA
    *************************************************************************/
   function renderEstatisticas(freq) {
     const N = cfgAtual.max;
     let html = '';
     for (let i=0;i<N;i++){
-      html += `<div class="stat-item"><div style="font-size:14px">${String(i+1).padStart(2,'0')}</div><div style="font-size:12px">${freq[i]}x</div></div>`;
+      // LOTOMANIA: mostrar números de 0-99, outras: 1-60, 1-80, etc.
+      const numeroDisplay = cfgAtual.api === 'lotomania' ? 
+        String(i).padStart(2,'0') : 
+        String(i+1).padStart(2,'0');
+      html += `<div class="stat-item"><div style="font-size:14px">${numeroDisplay}</div><div style="font-size:12px">${freq[i]}x</div></div>`;
     }
     estatisticasDiv.innerHTML = html;
   }
@@ -575,17 +754,28 @@ html = r"""<!DOCTYPE html>
   function renderResultados(arr) {
     let html = `<table><tr><th>Concurso</th><th>Data</th><th>Dezenas</th></tr>`;
     arr.slice().reverse().forEach(s => {
-      html += `<tr><td>${s.concurso}</td><td>${s.data}</td><td>${s.dezenas.map(d=>`<span class="dezena">${String(d).padStart(2,'0')}</span>`).join('')}</td></tr>`;
+      html += `<tr><td>${s.concurso}</td><td>${s.data}</td><td>${
+        s.dezenas.map(d => {
+          // LOTOMANIA: números já estão 0-99, outras: 1-60, 1-80, etc.
+          const displayNum = cfgAtual.api === 'lotomania' ? 
+            String(d).padStart(2,'0') : 
+            String(d).padStart(2,'0');
+          return `<span class="dezena">${displayNum}</span>`;
+        }).join('')
+      }</td></tr>`;
     });
     html += `</table>`;
     tabelaResultados.innerHTML = html;
   }
 
   function renderGrafico(freq) {
-    const labels = freq.map((_,i)=>String(i+1).padStart(2,'0'));
+    const labels = freq.map((_,i) => 
+      cfgAtual.api === 'lotomania' ? 
+        String(i).padStart(2,'0') : 
+        String(i+1).padStart(2,'0')
+    );
     const data = freq;
     if (chartInstance) chartInstance.destroy();
-    // backgroundColor como array para permitir highlight
     const bgArray = data.map(_ => '#2196f3');
     chartInstance = new Chart(graficoCanvas.getContext('2d'), {
       type:'bar',
@@ -595,41 +785,61 @@ html = r"""<!DOCTYPE html>
   }
 
   function renderAnaliseSummary(total, freq, scores) {
-    // top k dezenas pelo score
     const N = cfgAtual.max;
-    const arr = scores.map((s,i)=>({num:i+1,score:s,freq:freq[i]}));
+    const arr = scores.map((s,i)=>({
+      num: cfgAtual.api === 'lotomania' ? i : i + 1,
+      score: s,
+      freq: freq[i]
+    }));
     arr.sort((a,b)=>b.score-a.score);
     const topk = arr.slice(0,cfgAtual.defaultSize).map(x=>x.num);
 
     let html = `<div><b>Concursos analisados:</b> ${total}</div>`;
-    html += `<div style="margin-top:8px;"><b>Dezenas mais prováveis (score ajustado):</b> ${topk.map(d=>`<span class="dezena highlight">${String(d).padStart(2,'0')}</span>`).join(' ')}</div>`;
+    html += `<div style="margin-top:8px;"><b>Dezenas mais prováveis (score ajustado):</b> ${
+      topk.map(d => {
+        const displayNum = cfgAtual.api === 'lotomania' ? 
+          String(d).padStart(2,'0') : 
+          String(d).padStart(2,'0');
+        return `<span class="dezena highlight">${displayNum}</span>`;
+      }).join(' ')
+    }</div>`;
     analiseProb.innerHTML = html;
   }
 
   function renderHeatmap(matrix, freq) {
-    // mostra tabela simples de top pares (só como visualização leve)
     const N = cfgAtual.max;
     const total = ultimosSorteios.length;
     const pairs = [];
     for (let i=0;i<N;i++){
       for (let j=i+1;j<N;j++){
-        const val = (matrix[i][j] + matrix[j][i]) / total; // prob conjunta aproximada
-        pairs.push({ a:i+1, b:j+1, v: val });
+        const val = (matrix[i][j] + matrix[j][i]) / total;
+        pairs.push({ 
+          a: cfgAtual.api === 'lotomania' ? i : i + 1, 
+          b: cfgAtual.api === 'lotomania' ? j : j + 1, 
+          v: val 
+        });
       }
     }
     pairs.sort((a,b)=>b.v - a.v);
     const top = pairs.slice(0,30);
     let html = `<div><b>Top pares por coocorrência (frequência conjunta)</b></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">`;
-    top.forEach(p => html += `<div style="padding:6px;border-radius:6px;background:#fff">${String(p.a).padStart(2,'0')}-${String(p.b).padStart(2,'0')} <div class="small"> ${p.v.toFixed(3)}</div></div>`);
+    top.forEach(p => {
+      const displayA = cfgAtual.api === 'lotomania' ? 
+        String(p.a).padStart(2,'0') : 
+        String(p.a).padStart(2,'0');
+      const displayB = cfgAtual.api === 'lotomania' ? 
+        String(p.b).padStart(2,'0') : 
+        String(p.b).padStart(2,'0');
+      html += `<div style="padding:6px;border-radius:6px;background:#fff">${displayA}-${displayB} <div class="small"> ${p.v.toFixed(3)}</div></div>`;
+    });
     html += `</div>`;
     heatmapDiv.innerHTML = html;
   }
 
   /*************************************************************************
-   *  Gerador automático de combinações otimizadas
+   *  Gerador automático - CORREÇÃO PARA LOTOMANIA
    *************************************************************************/
   function sampleWithoutReplacementWeighted(weights, k) {
-    // weights: [{num, w}], retorna array nums ordenada
     const items = weights.map(x=>({ ...x }));
     const chosen = [];
     for (let r=0;r<k && items.length>0;r++){
@@ -654,12 +864,13 @@ html = r"""<!DOCTYPE html>
 
   function calcularScoreComb(comb) {
     const N = cfgAtual.max;
-    const idxs = comb.map(d=>d-1);
+    // CORREÇÃO: índices para Lotomania vs outras loterias
+    const idxs = comb.map(d => cfgAtual.api === 'lotomania' ? d : d - 1);
     const sumInd = idxs.reduce((s,i)=>s + (ultimoScores[i] || 0), 0);
     let sumPairs = 0, pairs=0;
     for (let i=0;i<idxs.length;i++){
       for (let j=i+1;j<idxs.length;j++){
-        const v = (coocMatrix[idxs[i]][idxs[j]] + coocMatrix[idxs[j]][idxs[i]]) / 2; // count
+        const v = (coocMatrix[idxs[i]][idxs[j]] + coocMatrix[idxs[j]][idxs[i]]) / 2;
         sumPairs += v;
         pairs++;
       }
@@ -667,8 +878,7 @@ html = r"""<!DOCTYPE html>
     const meanPairs = pairs ? (sumPairs / pairs) : 0;
     let gapsScore = 0;
     for (let i=1;i<comb.length;i++) gapsScore += Math.abs(comb[i] - comb[i-1]);
-    const diversity = gapsScore / comb.length; // higher = more diverse
-    // combine
+    const diversity = gapsScore / comb.length;
     const alpha = 1.0, beta = 0.6, gamma = 0.02;
     const score = alpha * sumInd + beta * meanPairs - gamma * (20 - diversity);
     return score;
@@ -679,11 +889,15 @@ html = r"""<!DOCTYPE html>
     const qtd = Math.max(1, Math.min(50, parseInt(qtdApostasInput.value) || 5));
     const k = Math.max(1, parseInt(tamanhoApostaInput.value) || cfgAtual.defaultSize);
     const N = cfgAtual.max;
-    // prepare weights (use ultimoScores as base) e garantir todos positivos
-    const base = ultimoScores.map((s,i)=>({ num: i+1, w: Math.max(0.00001, s) }));
-    // generate candidates unique
+    
+    // CORREÇÃO: base de weights considerando Lotomania
+    const base = ultimoScores.map((s,i)=>({ 
+      num: cfgAtual.api === 'lotomania' ? i : i + 1, 
+      w: Math.max(0.00001, s) 
+    }));
+    
     const candidatesMap = new Map();
-    const tries = Math.max(200, qtd * 150); // ajuste para performance
+    const tries = Math.max(200, qtd * 150);
     for (let t=0;t<tries;t++){
       const comb = sampleWithoutReplacementWeighted(base, k);
       const key = comb.join(',');
@@ -691,14 +905,20 @@ html = r"""<!DOCTYPE html>
       const sc = calcularScoreComb(comb);
       candidatesMap.set(key, { comb, score: sc });
     }
-    // pick top qtd
+    
     const arr = Array.from(candidatesMap.values()).sort((a,b)=>b.score - a.score).slice(0,qtd);
-    // render top
     combinacoesDiv.innerHTML = '';
     arr.forEach((t,i) => {
       const div = document.createElement('div');
       div.className = 'jogo';
-      div.innerHTML = `<div><b>Jogo ${i+1}</b> &nbsp; ${t.comb.map(d=>`<span class="dezena">${String(d).padStart(2,'0')}</span>`).join(' ')}</div>
+      div.innerHTML = `<div><b>Jogo ${i+1}</b> &nbsp; ${
+        t.comb.map(d => {
+          const displayNum = cfgAtual.api === 'lotomania' ? 
+            String(d).padStart(2,'0') : 
+            String(d).padStart(2,'0');
+          return `<span class="dezena">${displayNum}</span>`;
+        }).join(' ')
+      }</div>
                        <div class="small">score: ${t.score.toFixed(4)}</div>`;
       div.addEventListener('click', ()=> highlightCombination(t.comb));
       combinacoesDiv.appendChild(div);
@@ -710,21 +930,26 @@ html = r"""<!DOCTYPE html>
       ultimosSorteios.slice().reverse().map(s => {
         const str = s.dezenas.map(d => {
           const cls = comb.includes(d) ? 'dezena highlight' : 'dezena';
-          return `<span class="${cls}">${String(d).padStart(2,'0')}</span>`;
+          const displayNum = cfgAtual.api === 'lotomania' ? 
+            String(d).padStart(2,'0') : 
+            String(d).padStart(2,'0');
+          return `<span class="${cls}">${displayNum}</span>`;
         }).join('');
         return `<tr><td>${s.concurso}</td><td>${s.data}</td><td>${str}</td></tr>`;
       }).join('') + `</table>`;
     tabelaResultados.innerHTML = html;
-    // highlight on chart by modifying array of colors
+    
     if (chartInstance) {
       const labels = chartInstance.data.labels;
-      chartInstance.data.datasets[0].backgroundColor = labels.map((lab,i)=> comb.includes(i+1) ? '#ff5722' : '#2196f3');
+      chartInstance.data.datasets[0].backgroundColor = labels.map((lab,i) => {
+        const num = cfgAtual.api === 'lotomania' ? i : i + 1;
+        return comb.includes(num) ? '#ff5722' : '#2196f3';
+      });
       chartInstance.update();
       setTimeout(()=> {
-        // restore original single-color array
         chartInstance.data.datasets[0].backgroundColor = chartInstance.data.labels.map(_=> '#2196f3');
         chartInstance.update();
-        renderResultados(ultimosSorteios); // restore tabela
+        renderResultados(ultimosSorteios);
       }, 6000);
     }
   }
@@ -734,7 +959,6 @@ html = r"""<!DOCTYPE html>
    *************************************************************************/
   function exportConcursosCSV() {
     if (!ultimosSorteios.length) { alert('Nada a exportar'); return; }
-    // escape CSV fields
     let csv = 'concurso,data,dezenas\n';
     ultimosSorteios.forEach(s => {
       const dataEsc = (''+s.data).replace(/"/g,'""');
@@ -772,20 +996,62 @@ html = r"""<!DOCTYPE html>
     tamanhoApostaInput.value = cfgAtual.defaultSize;
     await atualizarCacheStatus();
     if ('serviceWorker' in navigator) {
-      try { navigator.serviceWorker.register('service-worker.js').catch(()=>{}); } catch(e){/* ignore */ }
+      try { navigator.serviceWorker.register('service-worker.js').catch(()=>{}); } catch(e){}
     }
-    // try to load last N by default
     try { await carregarIntervalo(); } catch(e) { console.warn('preload fail', e); }
   })();
 
   </script>
+  <script>
+// Registro do Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(function(registration) {
+        console.log('ServiceWorker registrado com sucesso: ', registration.scope);
+        
+        // Verificar atualizações
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('Nova versão do Service Worker encontrada!');
+          
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Nova versão disponível
+              if (confirm('Nova versão disponível! Recarregar para atualizar?')) {
+                window.location.reload();
+              }
+            }
+          });
+        });
+      })
+      .catch(function(error) {
+        console.log('Falha no registro do ServiceWorker: ', error);
+      });
+  });
+
+  // Ouvir mensagens do Service Worker
+  navigator.serviceWorker.addEventListener('message', event => {
+    console.log('Mensagem do Service Worker:', event.data);
+    
+    if (event.data && event.data.type === 'CACHE_UPDATED') {
+      console.log('Cache atualizado:', event.data.payload);
+    }
+  });
+}
+
+// Detectar se está em modo standalone (PWA)
+function isRunningStandalone() {
+  return (window.matchMedia('(display-mode: standalone)').matches) || 
+         (window.navigator.standalone) || 
+         (document.referrer.includes('android-app://'));
+}
+
+// Aplicar lógica específica para PWA
+if (isRunningStandalone()) {
+  document.documentElement.classList.add('pwa-mode');
+  console.log('Executando como PWA');
+}
+</script>
 </body>
 </html>
-"""
-
-path = "/mnt/data/Analise_JB_Loto.html"
-with open(path, "w", encoding="utf-8") as f:
-    f.write(html)
-
-print(path)
-
