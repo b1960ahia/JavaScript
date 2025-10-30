@@ -1,11 +1,10 @@
 const CACHE_NAME = 'loterias-cache-v1';
 const urlsToCache = [
-  '/JavaScript/LotoMenu/',
-  '/JavaScript/LotoMenu/lotomenu.html',
+  '/JavaScript/LotoMenu/analisededados.html',
   '/JavaScript/LotoMenu/manifest.json',
-  '/JavaScript/LotoMenu/icone-192.png',
-  '/JavaScript/LotoMenu/icone-512.png'
-  // acrescente outros arquivos JS/CSS que usar
+  '/JavaScript/LotoMenu/icon-192.png',
+  '/JavaScript/LotoMenu/icon-512.png',
+  '/JavaScript/LotoMenu/service-worker.js'
 ];
 
 self.addEventListener('install', event => {
@@ -23,4 +22,3 @@ self.addEventListener('fetch', event => {
     })
   );
 });
-
