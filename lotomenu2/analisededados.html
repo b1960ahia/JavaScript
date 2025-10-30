@@ -1,176 +1,50 @@
-<!DOCTYPE html>
+# Writing the complete corrected HTML file for the user and saving it to /mnt/data
+html = r"""<!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Loterias — Analisador Avançado (PWA)</title>
-  <!-- PWA Meta Tags -->
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Analisador Loterias">
-<link rel="apple-touch-icon" href="icone-192.png">
-
-<!-- Theme Color para diferentes navegadores -->
-<meta name="theme-color" content="#2196f3">
-<meta name="msapplication-navbutton-color" content="#2196f3">
-<meta name="apple-mobile-web-app-status-bar-style" content="#2196f3">
+  <title>Analise JB Loto</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2196f3">
   <style>
-    /* Reset / base */
-    :root{--primary:#2196f3;--accent:#ff5722;--bg:#fbfbfd;--card:#fff}
-    body { font-family: Arial, sans-serif; margin: 0; background:var(--bg); color:#111; }
-    .container { max-width:1200px; margin:0 auto; padding:16px; }
-
-    /* Header / Nav */
-    header.app-header{background:linear-gradient(90deg, #f8fcff, #ffffff); border-bottom:1px solid rgba(0,0,0,0.04);}
-    .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:12px}
-    .brand{display:flex;align-items:center;gap:10px}
-    .brand h1{font-size:18px;margin:0}
-    .nav-links{display:flex;gap:8px;align-items:center}
-    .nav-links a{padding:8px 10px;border-radius:6px;text-decoration:none;color:var(--primary);font-weight:600}
-
-    /* hamburger */
-    .hamburger{display:inline-flex;flex-direction:column;gap:4px;width:44px;height:36px;justify-content:center;align-items:center;border:1px solid transparent;border-radius:8px;background:transparent;cursor:pointer}
-    .hamburger span{display:block;width:22px;height:2px;background:var(--primary);border-radius:2px;transition:transform .18s,opacity .18s}
-    .hamburger[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg)}
-    .hamburger[aria-expanded="true"] span:nth-child(2){opacity:0}
-    .hamburger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
-
-    /* mobile nav panel */
-    .mobile-nav{position:fixed;top:0;left:0;right:0;height:100vh;background:rgba(255,255,255,0.98);backdrop-filter:blur(4px);z-index:1200;transform:translateY(-100%);transition:transform .28s ease;display:flex;flex-direction:column;padding:20px}
-    .mobile-nav.open{transform:translateY(0)}
-    .mobile-nav .close-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .mobile-nav nav{display:flex;flex-direction:column;gap:8px}
-    .mobile-nav a{padding:12px;border-radius:8px;text-decoration:none;color:#111;background:#f5f7fb}
-
-    /* Page styles (kept from original, slightly reorganized) */
-    .panel{background:var(--card);margin-top:14px;padding:12px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-    .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    label{font-size:14px;margin-right:8px}
-    input[type=number],select,input[type=date]{padding:6px 8px;border:1px solid #ddd;border-radius:4px}
-    button{background:var(--primary);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600}
-    button.secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
-    .col{flex:1;min-width:260px}
-    #loading{margin-top:10px;font-style:italic;color:#666}
-    .stats-grid{display:grid;gap:8px;margin-bottom:16px}
-    .stat-item{background:#e3f2fd;padding:8px;border-radius:6px;text-align:center;font-weight:700}
-    .dezena{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;align-items:center;justify-content:center;margin:2px;font-weight:700}
-    .dezena.highlight{background:var(--accent) !important}
-    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
-    th,td{border:1px solid #eee;padding:6px;text-align:center}
-    #graficoWrapper{overflow-x:auto;padding:8px}
-    .jogo{margin:8px 0;padding:8px;border-radius:6px;background:linear-gradient(90deg,#fff,#fffaf0);display:flex;justify-content:space-between;align-items:center}
-    .small{font-size:13px;color:#555}
-    .progress{height:8px;background:#eee;border-radius:8px;overflow:hidden;margin-top:8px}
-    .progress>i{display:block;height:100%;background:linear-gradient(90deg,#66bb6a,#43a047);width:0%;transition:width .2s}
-    .controls-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .btn-ghost{background:transparent;border:1px solid #ddd;padding:6px 10px;border-radius:6px;cursor:pointer}
-    #heatmap{width:100%;overflow:auto}
-    pre{background:#f7f7f8;padding:10px;border-radius:6px;overflow:auto}
-
-    /* Responsive: show nav links on desktop, hamburger on small screens */
-    @media (min-width:880px){
-      .hamburger{display:none}
-      .mobile-nav{display:none}
-      .nav-links{display:flex}
-    }
-    @media (max-width:879px){
-      .nav-links{display:none}
-      .container{padding:12px}
-    }
-    
-    /* Grid responsivo para estatísticas */
-    /* Mega-Sena (60 números) */
-    .stats-grid.megasena {
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    }
-    
-    /* Lotofácil (25 números) */
-    .stats-grid.lotofacil {
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    }
-    
-    /* Quina (80 números) */
-    .stats-grid.quina {
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    }
-    
-    /* Lotomania (100 números) */
-    .stats-grid.lotomania {
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    }
-
-    /* Melhorias para o grid responsivo */
-    @media (max-width: 600px) {
-      .stats-grid {
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
-        gap: 6px;
-      }
-      
-      .stat-item {
-        padding: 6px 4px;
-        font-size: 12px;
-      }
-      
-      .stat-item div:first-child {
-        font-size: 12px;
-      }
-      
-      .stat-item div:last-child {
-        font-size: 11px;
-      }
-    }
-
-    /* Para telas maiores */
-    @media (min-width: 1200px) {
-      .stats-grid {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)) !important;
-      }
-    }
+    /* (mantive seu CSS, pequenos ajustes visuais) */
+    body { font-family: Arial, sans-serif; margin: 16px; background:#fbfbfd; color:#111; }
+    .container { max-width:1200px; margin:0 auto; }
+    h1 { margin-bottom:8px; }
+    .filters { background:#fff; padding:12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+    label { font-size:14px; margin-right:8px; }
+    input[type=number], select, input[type=date] { padding:6px 8px; border:1px solid #ddd; border-radius:4px; }
+    button { background:#2196f3; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600; }
+    button.secondary { background:#fff; color:#2196f3; border:1px solid #2196f3; }
+    .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+    .col { flex:1; min-width:260px; }
+    #loading { margin-top:10px; font-style:italic; color:#666; }
+    .panel { background:#fff; margin-top:14px; padding:12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+    .stats { display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(60px,1fr)); }
+    .stat-item { background:#e3f2fd; padding:8px; border-radius:6px; text-align:center; font-weight:700; }
+    .dezena { display:inline-flex; width:30px; height:30px; border-radius:50%; background:#2196f3; color:#fff; align-items:center; justify-content:center; margin:2px; font-weight:700;}
+    .dezena.highlight { background:#ff5722 !important; }
+    table { width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; }
+    th, td { border:1px solid #eee; padding:6px; text-align:center; }
+    #graficoWrapper { overflow-x:auto; padding:8px; }
+    #combinacoesOtimizadas .jogo { margin:8px 0; padding:8px; border-radius:6px; background:linear-gradient(90deg,#fff,#fffaf0); display:flex; justify-content:space-between; align-items:center; }
+    .small { font-size:13px; color:#555; }
+    .progress { height:8px; background:#eee; border-radius:8px; overflow:hidden; margin-top:8px; }
+    .progress > i { display:block; height:100%; background:linear-gradient(90deg,#66bb6a,#43a047); width:0%; transition:width .2s; }
+    .controls-inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .btn-ghost { background:transparent; border:1px solid #ddd; padding:6px 10px; border-radius:6px; cursor:pointer; }
+    #heatmap { width:100%; overflow:auto; }
+    pre { background:#f7f7f8; padding:10px; border-radius:6px; overflow:auto; }
+    input[type=number].small-num { width:80px; padding:6px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <header class="app-header">
-    <div class="topbar container">
-      <div class="brand">
-        <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-        <h1>📊 Loterias — Analisador Avançado</h1>
-      </div>
+  <div class="container">
+    <h1>📊 Analise JB Loto</h1>
 
-      <div class="nav-links" role="navigation" aria-label="Navegação principal">
-        <a href="#estatisticas" data-target="estatisticas">Estatísticas</a>
-        <a href="#resultados" data-target="resultados">Resultados</a>
-        <a href="#analise" data-target="analise">Análise</a>
-        <a href="#heatmap" data-target="heatmap">Heatmap</a>
-        <a href="#config" data-target="config">Config</a>
-      </div>
-    </div>
-
-    <!-- mobile nav panel -->
-    <div class="mobile-nav" id="mobileNav" aria-hidden="true">
-      <div class="close-row">
-        <strong>Menu</strong>
-        <button id="closeNav" class="btn-ghost" aria-label="Fechar menu">Fechar</button>
-      </div>
-      <nav>
-        <a href="#estatisticas" data-target="estatisticas">📈 Estatísticas</a>
-        <a href="#resultados" data-target="resultados">🎯 Resultados</a>
-        <a href="#analise" data-target="analise">🔮 Análise</a>
-        <a href="#heatmap" data-target="heatmap">🔬 Heatmap</a>
-        <a href="#config" data-target="config">⚙️ Configurações</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="container" id="mainContent">
-
-    <section id="config" class="panel filters">
+    <div class="panel filters">
       <div class="controls-inline col">
         <label>Loteria:
           <select id="tipoLoteria">
@@ -180,9 +54,10 @@
             <option value="lotomania">Lotomania</option>
           </select>
         </label>
-        <label>Concurso Início: <input id="concursoInicio" type="number" min="1" style="width:100px"></label>
-        <label>Concurso Fim: <input id="concursoFim" type="number" min="1" style="width:100px"></label>
+        <label>Concurso Início: <input id="concursoInicio" type="number" min="1" class="small-num"></label>
+        <label>Concurso Fim: <input id="concursoFim" type="number" min="1" class="small-num"></label>
         <button id="btnAtualizar">Atualizar</button>
+        <label style="margin-left:8px">Últimos <input id="ultimosN" type="number" min="1" value="20" class="small-num"> concursos</label>
       </div>
 
       <div class="controls-inline col" style="justify-content:flex-end">
@@ -197,28 +72,31 @@
         <div class="controls-inline">
           <button id="btnFetchAll" class="btn-ghost">Usar todos os concursos disponíveis (1 → último)</button>
           <button id="btnClearCache" class="btn-ghost">Limpar cache</button>
+          <button id="btnLimparExpirado" class="btn-ghost" title="Remover cache com mais de 180 dias">Limpar cache (>180d)</button>
         </div>
       </div>
 
-    </section>
+    </div>
 
     <div id="loading" class="small"></div>
     <div class="progress" style="display:none"><i id="progressBar"></i></div>
 
-    <section id="estatisticas" class="panel">
+    <div class="panel">
       <h2>📈 Estatísticas</h2>
-      <div id="estatisticasGrid" class="stats-grid megasena"></div>
+      <div id="estatisticas" class="stats"></div>
       <div id="graficoWrapper"><canvas id="grafico"></canvas></div>
-    </section>
+    </div>
 
-    <section id="resultados" class="panel">
+    <div class="panel">
       <h2>🎯 Resultados (lista)</h2>
       <div class="small">Clique em uma combinação sugerida para destacá-la na lista / gráfico.</div>
       <div id="tabelaResultados"></div>
-      <div style="margin-top:8px;"><button id="btnExportCSV">Exportar concursos (CSV)</button></div>
-    </section>
+      <div style="margin-top:8px;">
+        <button id="btnExportCSV">Exportar concursos (CSV)</button>
+      </div>
+    </div>
 
-    <section id="analise" class="panel">
+    <div class="panel">
       <h2>🔮 Análise Preditiva e Geração</h2>
       <div id="analiseProb" class="small"></div>
 
@@ -230,21 +108,21 @@
       </div>
 
       <div id="combinacoesOtimizadas"></div>
-    </section>
+    </div>
 
-    <section id="heatmap" class="panel">
+    <div class="panel">
       <h2>🔬 Matriz de Coocorrência (visual)</h2>
       <div id="heatmap" class="small"></div>
-    </section>
+    </div>
 
-  </main>
+  </div>
 
   <script>
   /*************************************************************************
-   *  IndexedDB simple wrapper (mantido)
+   *  IndexedDB simple wrapper (robusto)
    *************************************************************************/
   const DB_NAME = 'loterias_cache_v1';
-  const DB_STORE = 'concurso_store';
+  const DB_STORE = 'concurso_store'; // key: `${tipo}:${numero}`, value: objeto concurso
   let dbPromise = null;
 
   function openDB() {
@@ -312,6 +190,36 @@
     });
   }
 
+  async function idbDelete(key) {
+    const db = await openDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(DB_STORE,'readwrite');
+      tx.objectStore(DB_STORE).delete(key);
+      tx.oncomplete = () => res(true);
+      tx.onerror = e => rej(e);
+    });
+  }
+
+  async function limparCacheExpirado(days = 180) {
+    const cutoff = Date.now() - days * 24 * 3600 * 1000;
+    const db = await openDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      const store = tx.objectStore(DB_STORE);
+      const req = store.openCursor();
+      req.onsuccess = e => {
+        const cur = e.target.result;
+        if (!cur) { res(true); return; }
+        const rec = cur.value;
+        if (rec && rec.ts && rec.ts < cutoff) {
+          cur.delete();
+        }
+        cur.continue();
+      };
+      req.onerror = e => rej(e);
+    });
+  }
+
   /*************************************************************************
    *  Config Loterias
    *************************************************************************/
@@ -323,10 +231,10 @@
   };
 
   let cfgAtual = cfgLoterias['megasena'];
-  let ultimosSorteios = [];
+  let ultimosSorteios = []; // array de {concurso, data, dezenas}
   let statsGlobais = [];
-  let coocMatrix = [];
-  let ultimoScores = [];
+  let coocMatrix = []; // NxN
+  let ultimoScores = []; // array N with scores used to generate
 
   // DOM
   const tipoSel = document.getElementById('tipoLoteria');
@@ -338,10 +246,11 @@
   const btnFiltrarData = document.getElementById('btnFiltrarData');
   const btnFetchAll = document.getElementById('btnFetchAll');
   const btnClearCache = document.getElementById('btnClearCache');
+  const btnLimparExpirado = document.getElementById('btnLimparExpirado');
   const loadingText = document.getElementById('loading');
   const progressBar = document.getElementById('progressBar');
   const progressWrap = document.querySelector('.progress');
-  const estatisticasGrid = document.getElementById('estatisticasGrid');
+  const estatisticasDiv = document.getElementById('estatisticas');
   const tabelaResultados = document.getElementById('tabelaResultados');
   const graficoCanvas = document.getElementById('grafico');
   const analiseProb = document.getElementById('analiseProb');
@@ -352,11 +261,7 @@
   const btnExportComb = document.getElementById('btnExportComb');
   const qtdApostasInput = document.getElementById('qtdApostas');
   const tamanhoApostaInput = document.getElementById('tamanhoAposta');
-
-  // Header / nav controls
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const mobileNav = document.getElementById('mobileNav');
-  const closeNav = document.getElementById('closeNav');
+  const ultimosNInput = document.getElementById('ultimosN');
 
   tipoSel.addEventListener('change', () => {
     cfgAtual = cfgLoterias[tipoSel.value];
@@ -373,6 +278,12 @@
     atualizarCacheStatus();
     alert('Cache limpo.');
   });
+  btnLimparExpirado.addEventListener('click', async () => {
+    if (!confirm('Remover do cache registros com mais de 180 dias?')) return;
+    await limparCacheExpirado(180);
+    atualizarCacheStatus();
+    alert('Cache antigo removido.');
+  });
 
   btnExportCSV.addEventListener('click', exportConcursosCSV);
   btnGerarOtimizadas.addEventListener('click', () => gerarCombinacoesOtimizadas());
@@ -382,13 +293,47 @@
   let chartInstance = null;
 
   /*************************************************************************
-   *  Fetch helpers (Caixa API)
+   *  Fetch helpers (Caixa API) - com tratamento de formatos inconsistentes
    *************************************************************************/
   async function fetchConcurso(tipoApi, numero) {
     const url = `https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipoApi}/${numero}`;
-    const resp = await fetch(url, { headers: { "Accept": "application/json, text/plain, */*" } });
-    if (!resp.ok) throw new Error(`Erro ${resp.status}`);
-    return await resp.json();
+    try {
+      const resp = await fetch(url, { headers: { "Accept": "application/json, text/plain, */*" } });
+      if (!resp.ok) {
+        // 404 possivelmente concurso inexistente → retornar null e continuar
+        console.warn(`fetchConcurso ${tipoApi}/${numero} -> ${resp.status}`);
+        return null;
+      }
+      const raw = await resp.json();
+      // formatos podem variar: listaDezenas, listaDezenasOrd, dezenas, etc.
+      let dezenas = null;
+      if (raw.listaDezenas && Array.isArray(raw.listaDezenas)) dezenas = raw.listaDezenas;
+      else if (raw.dezenas && Array.isArray(raw.dezenas)) dezenas = raw.dezenas;
+      else if (raw.listaDezenasOrd && Array.isArray(raw.listaDezenasOrd)) dezenas = raw.listaDezenasOrd;
+      else if (raw.dezenasSorteadasOrdemSorteio && Array.isArray(raw.dezenasSorteadasOrdemSorteio)) dezenas = raw.dezenasSorteadasOrdemSorteio;
+      else if (raw.listaDezenasSorteadas && Array.isArray(raw.listaDezenasSorteadas)) dezenas = raw.listaDezenasSorteadas;
+
+      // fallback: tentar extrair campos numéricos no objeto
+      if (!dezenas) {
+        for (const k in raw) {
+          if (Array.isArray(raw[k]) && raw[k].length > 0) {
+            // verificar se os itens são números ou strings numéricas
+            const allNum = raw[k].every(v => (typeof v === 'number') || (typeof v === 'string' && /^\d+$/.test(v)));
+            if (allNum) { dezenas = raw[k]; break; }
+          }
+        }
+      }
+
+      if (!dezenas) {
+        console.warn('Formato inesperado para', tipoApi, numero, raw);
+        return null;
+      }
+
+      return { numero: raw.numero || numero, dataApuracao: raw.dataApuracao || raw.data || raw.dataSorteio || null, listaDezenas: dezenas };
+    } catch (err) {
+      console.warn('Erro fetchConcurso', url, err);
+      return null;
+    }
   }
 
   async function fetchUltimoConcurso(tipoApi) {
@@ -409,7 +354,17 @@
       let inicio = parseInt(inicioInput.value);
       let fim = parseInt(fimInput.value);
 
-      if (!inicio || !fim) {
+      // opção "últimos N"
+      const ultN = parseInt(ultimosNInput.value) || 0;
+
+      // se não informado, pega últimos N ou últimos 20 por default
+      if ((!inicio || !fim) && ultN) {
+        const ultimo = await fetchUltimoConcurso(cfgAtual.api);
+        fim = ultimo.numero;
+        inicio = Math.max(1, fim - Math.max(1, ultN - 1));
+        inicioInput.value = inicio;
+        fimInput.value = fim;
+      } else if (!inicio || !fim) {
         const ultimo = await fetchUltimoConcurso(cfgAtual.api);
         fim = ultimo.numero;
         inicio = Math.max(1, fim - 20);
@@ -419,6 +374,7 @@
 
       if (inicio > fim) { alert('Concurso início > concurso fim'); return; }
 
+      // Carrega cada concurso, priorizando cache
       loadingText.innerText = `Buscando concursos ${inicio} → ${fim} ...`;
       progressWrap.style.display = 'block';
       progressBar.style.width = '0%';
@@ -426,69 +382,38 @@
       const arr = [];
       const total = fim - inicio + 1;
       let loaded = 0;
-      
       for (let n = inicio; n <= fim; n++) {
         const key = cacheKey(cfgAtual.api, n);
         let data = await idbGet(key);
-        
         if (!data) {
-          try {
-            const raw = await fetchConcurso(cfgAtual.api, n);
-            // CORREÇÃO: Tratamento específico para Lotomania
-            let listaDezenas = raw.listaDezenas || [];
-            
-            // Se for Lotomania e não tiver listaDezenas, tentar outros campos
-            if (cfgAtual.api === 'lotomania' && (!listaDezenas || listaDezenas.length === 0)) {
-              listaDezenas = raw.dezenas || raw.numeros || [];
-            }
-            
-            data = { 
-              numero: raw.numero, 
-              dataApuracao: raw.dataApuracao, 
-              listaDezenas: listaDezenas 
-            };
-            await idbPut(key, data);
-          } catch (err) {
-            console.warn('Erro fetch concurso', n, err);
+          const raw = await fetchConcurso(cfgAtual.api, n);
+          if (raw) {
+            data = { numero: raw.numero, dataApuracao: raw.dataApuracao, listaDezenas: raw.listaDezenas };
+            try { await idbPut(key, data); } catch(e){ /* continue mesmo se falhar em salvar cache */ }
+          } else {
             data = null;
           }
         }
-        
-        if (data) {
-          // CORREÇÃO: Processamento seguro das dezenas
-          const dezenasProcessadas = (data.listaDezenas || [])
-            .map(x => {
-              const num = parseInt(x, 10);
-              return isNaN(num) ? null : num;
-            })
-            .filter(x => x !== null && x >= 0 && x <= cfgAtual.max)
-            .sort((a, b) => a - b);
-          
-          arr.push({ 
-            concurso: data.numero, 
-            data: data.dataApuracao, 
-            dezenas: dezenasProcessadas 
-          });
+        if (data && Array.isArray(data.listaDezenas)) {
+          arr.push({ concurso: data.numero, data: data.dataApuracao, dezenas: data.listaDezenas.map(x=>parseInt(x,10)).sort((a,b)=>a-b) });
         }
-        
         loaded++;
-        progressBar.style.width = `${Math.round((loaded / total) * 100)}%`;
+        progressBar.style.width = `${Math.round((loaded/total)*100)}%`;
       }
-      
       progressWrap.style.display = 'none';
       loadingText.innerText = '';
-      ultimosSorteios = arr.sort((a, b) => a.concurso - b.concurso);
+      ultimosSorteios = arr.sort((a,b)=>a.concurso - b.concurso);
       processarDadosEExibir();
       atualizarCacheStatus();
-      
     } catch (e) {
-      console.error('Erro no carregamento:', e);
+      console.error(e);
       alert('Erro ao carregar intervalo. Veja console.');
       progressWrap.style.display = 'none';
-      loadingText.innerText = 'Erro no carregamento';
+      loadingText.innerText = '';
     }
   }
 
+  // Filtrar por data (busca todos concursos em cache / online que caibam no intervalo)
   async function filtrarPorData() {
     const di = dataInicio.value;
     const df = dataFim.value;
@@ -497,6 +422,7 @@
     const end = new Date(df);
     if (start > end) { alert('Data início maior que fim'); return; }
 
+    // Busca chaves do cache para esse tipo e filtra por data; se não tiver tudo, consulta últimos e filtra
     cfgAtual = cfgLoterias[tipoSel.value];
     const keys = await idbKeysPrefix(cfgAtual.api + ':');
     let arr = [];
@@ -504,24 +430,10 @@
       const val = await idbGet(k);
       if (!val) continue;
       const d = new Date(val.dataApuracao);
-      if (d >= start && d <= end) {
-        // CORREÇÃO: Processamento seguro das dezenas
-        const dezenasProcessadas = (val.listaDezenas || [])
-          .map(x => {
-            const num = parseInt(x, 10);
-            return isNaN(num) ? null : num;
-          })
-          .filter(x => x !== null && x >= 0 && x <= cfgAtual.max)
-          .sort((a, b) => a - b);
-        
-        arr.push({ 
-          concurso: val.numero, 
-          data: val.dataApuracao, 
-          dezenas: dezenasProcessadas 
-        });
-      }
+      if (d >= start && d <= end) arr.push({ concurso: val.numero, data: val.dataApuracao, dezenas: val.listaDezenas.map(x=>parseInt(x,10)).sort((a,b)=>a-b) });
     }
 
+    // Se cache não tem nada no periodo, tentamos buscar últimos 400 concursos e filtrar online
     if (arr.length === 0) {
       const ultimo = await fetchUltimoConcurso(cfgAtual.api);
       const fim = ultimo.numero;
@@ -534,29 +446,11 @@
       for (let n = inicio; n <= fim; n++) {
         let raw = await idbGet(cacheKey(cfgAtual.api, n));
         if (!raw) {
-          try { 
-            raw = await fetchConcurso(cfgAtual.api, n); 
-            await idbPut(cacheKey(cfgAtual.api, n), raw); 
-          } catch {}
+          try { raw = await fetchConcurso(cfgAtual.api, n); if (raw) await idbPut(cacheKey(cfgAtual.api, n), raw); } catch(e) {}
         }
         if (raw) {
           const dd = new Date(raw.dataApuracao);
-          if (dd >= start && dd <= end) {
-            // CORREÇÃO: Processamento seguro das dezenas
-            const dezenasProcessadas = (raw.listaDezenas || [])
-              .map(x => {
-                const num = parseInt(x, 10);
-                return isNaN(num) ? null : num;
-              })
-              .filter(x => x !== null && x >= 0 && x <= cfgAtual.max)
-              .sort((a, b) => a - b);
-            
-            temp.push({ 
-              concurso: raw.numero, 
-              data: raw.dataApuracao, 
-              dezenas: dezenasProcessadas 
-            });
-          }
+          if (dd >= start && dd <= end) temp.push({ concurso: raw.numero, data: raw.dataApuracao, dezenas: raw.listaDezenas.map(x=>parseInt(x,10)).sort((a,b)=>a-b) });
         }
         loaded++;
         progressBar.style.width = `${Math.round((loaded/(fim-inicio+1))*100)}%`;
@@ -571,6 +465,7 @@
     atualizarCacheStatus();
   }
 
+  // Busca TODOS os concursos (1 -> ultimo) e faz cache progressivo
   async function fetchAllConcursos() {
     if (!confirm('Isto irá baixar muitos concursos (um por um) e armazenar em seu navegador. Deseja continuar?')) return;
     cfgAtual = cfgLoterias[tipoSel.value];
@@ -579,7 +474,7 @@
     const inicio = 1;
     loadingText.innerText = `Baixando todos os concursos 1 → ${fim} (cache progressivo). Pode demorar.`;
     progressWrap.style.display = 'block';
-    const batch = 25;
+    const batch = 25; // ajustar conforme necessidade
     let loaded = 0;
 
     for (let s = inicio; s <= fim; s += batch) {
@@ -591,21 +486,9 @@
           if (!existing) {
             try {
               const raw = await fetchConcurso(cfgAtual.api, n);
-              // CORREÇÃO: Tratamento específico para Lotomania
-              let listaDezenas = raw.listaDezenas || [];
-              
-              // Se for Lotomania e não tiver listaDezenas, tentar outros campos
-              if (cfgAtual.api === 'lotomania' && (!listaDezenas || listaDezenas.length === 0)) {
-                listaDezenas = raw.dezenas || raw.numeros || [];
-              }
-              
-              await idbPut(key, { 
-                numero: raw.numero, 
-                dataApuracao: raw.dataApuracao, 
-                listaDezenas: listaDezenas 
-              });
+              if (raw) await idbPut(key, { numero: raw.numero, dataApuracao: raw.dataApuracao, listaDezenas: raw.listaDezenas });
             } catch (err) {
-              console.warn('Erro ao buscar concurso', n, err);
+              // ignorar erro, continuar
             }
           }
         })());
@@ -626,64 +509,50 @@
   }
 
   /*************************************************************************
-   *  Processamento de dados
+   *  Processamento de dados: frequências, coocorrências, scores
    *************************************************************************/
   function processarDadosEExibir() {
     if (!ultimosSorteios || ultimosSorteios.length === 0) {
-      estatisticasGrid.innerHTML = '<div class="small">Nenhum concurso carregado.</div>';
+      estatisticasDiv.innerHTML = '<div class="small">Nenhum concurso carregado.</div>';
       tabelaResultados.innerHTML = '';
       analiseProb.innerHTML = '';
       combinacoesDiv.innerHTML = '';
       heatmapDiv.innerHTML = '';
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
       return;
     }
-    
     const N = cfgAtual.max;
     const freq = Array(N).fill(0);
-    const matrix = Array.from({length: N}, () => Array(N).fill(0));
+    const matrix = Array.from({length:N}, ()=>Array(N).fill(0));
     const total = ultimosSorteios.length;
 
-    // Processar cada sorteio - CORREÇÃO PARA LOTOMANIA
     ultimosSorteios.forEach(s => {
-      // Garantir que as dezenas são números válidos
-      const dezenasValidas = s.dezenas
-        .map(d => parseInt(d, 10))
-        .filter(d => !isNaN(d) && d >= 1 && d <= N);
-      
-      dezenasValidas.forEach(d1 => {
-        if (d1 >= 1 && d1 <= N) {
-          freq[d1 - 1]++;
-          dezenasValidas.forEach(d2 => {
-            if (d2 >= 1 && d2 <= N && d1 !== d2) {
-              matrix[d1 - 1][d2 - 1]++;
-            }
-          });
-        }
+      s.dezenas.forEach(d1 => {
+        freq[d1-1]++;
+        s.dezenas.forEach(d2 => {
+          if (d1 !== d2) matrix[d1-1][d2-1]++;
+        });
       });
     });
 
     statsGlobais = freq;
     coocMatrix = matrix;
 
-    // Calcular probabilidades e scores
+    // scores por dezena: freq * associação média (como definido antes)
     const p = freq.map(f => f / total);
-    const p2 = matrix.map(l => l.map(v => v / total));
+    const p2 = matrix.map(l => l.map(v => v/total));
     const associacao = Array(N).fill(0);
-    
-    for (let i = 0; i < N; i++) {
-      let soma = 0, cont = 0;
-      for (let j = 0; j < N; j++) {
-        if (i !== j && p[i] > 0 && p[j] > 0) { 
-          soma += p2[i][j] / (p[i] * p[j]); 
-          cont++; 
-        }
+    for (let i=0;i<N;i++){
+      let soma=0, cont=0;
+      for (let j=0;j<N;j++){
+        if (i!==j && p[i]>0 && p[j]>0) { soma += p2[i][j]/(p[i]*p[j]); cont++; }
       }
-      associacao[i] = cont ? soma / cont : 1;
+      associacao[i] = cont ? soma/cont : 1;
     }
-    
-    const scores = freq.map((f, i) => f * associacao[i]);
+    const scores = freq.map((f,i) => f * associacao[i]);
     ultimoScores = scores;
 
+    // exibir: estatísticas e tabela de resultados
     renderEstatisticas(freq);
     renderResultados(ultimosSorteios);
     renderGrafico(freq);
@@ -696,15 +565,11 @@
    *************************************************************************/
   function renderEstatisticas(freq) {
     const N = cfgAtual.max;
-    
-    // Atualizar classe CSS do grid baseado na loteria atual
-    estatisticasGrid.className = `stats-grid ${tipoSel.value}`;
-    
     let html = '';
     for (let i=0;i<N;i++){
       html += `<div class="stat-item"><div style="font-size:14px">${String(i+1).padStart(2,'0')}</div><div style="font-size:12px">${freq[i]}x</div></div>`;
     }
-    estatisticasGrid.innerHTML = html;
+    estatisticasDiv.innerHTML = html;
   }
 
   function renderResultados(arr) {
@@ -720,14 +585,17 @@
     const labels = freq.map((_,i)=>String(i+1).padStart(2,'0'));
     const data = freq;
     if (chartInstance) chartInstance.destroy();
+    // backgroundColor como array para permitir highlight
+    const bgArray = data.map(_ => '#2196f3');
     chartInstance = new Chart(graficoCanvas.getContext('2d'), {
       type:'bar',
-      data:{ labels, datasets:[{ label:'Frequência', data, backgroundColor:'#2196f3' }]},
-      options:{ responsive:true, plugins:{ legend:{display:false} } }
+      data:{ labels, datasets:[{ label:'Frequência', data, backgroundColor:bgArray }]},
+      options:{ responsive:true, plugins:{ legend:{display:false} }, scales:{ x:{ticks:{maxRotation:0,minRotation:0}} } }
     });
   }
 
   function renderAnaliseSummary(total, freq, scores) {
+    // top k dezenas pelo score
     const N = cfgAtual.max;
     const arr = scores.map((s,i)=>({num:i+1,score:s,freq:freq[i]}));
     arr.sort((a,b)=>b.score-a.score);
@@ -739,12 +607,13 @@
   }
 
   function renderHeatmap(matrix, freq) {
+    // mostra tabela simples de top pares (só como visualização leve)
     const N = cfgAtual.max;
     const total = ultimosSorteios.length;
     const pairs = [];
     for (let i=0;i<N;i++){
       for (let j=i+1;j<N;j++){
-        const val = (matrix[i][j] + matrix[j][i]) / total;
+        const val = (matrix[i][j] + matrix[j][i]) / total; // prob conjunta aproximada
         pairs.push({ a:i+1, b:j+1, v: val });
       }
     }
@@ -760,6 +629,7 @@
    *  Gerador automático de combinações otimizadas
    *************************************************************************/
   function sampleWithoutReplacementWeighted(weights, k) {
+    // weights: [{num, w}], retorna array nums ordenada
     const items = weights.map(x=>({ ...x }));
     const chosen = [];
     for (let r=0;r<k && items.length>0;r++){
@@ -789,7 +659,7 @@
     let sumPairs = 0, pairs=0;
     for (let i=0;i<idxs.length;i++){
       for (let j=i+1;j<idxs.length;j++){
-        const v = (coocMatrix[idxs[i]][idxs[j]] + coocMatrix[idxs[j]][idxs[i]]) / 2;
+        const v = (coocMatrix[idxs[i]][idxs[j]] + coocMatrix[idxs[j]][idxs[i]]) / 2; // count
         sumPairs += v;
         pairs++;
       }
@@ -797,7 +667,8 @@
     const meanPairs = pairs ? (sumPairs / pairs) : 0;
     let gapsScore = 0;
     for (let i=1;i<comb.length;i++) gapsScore += Math.abs(comb[i] - comb[i-1]);
-    const diversity = gapsScore / comb.length;
+    const diversity = gapsScore / comb.length; // higher = more diverse
+    // combine
     const alpha = 1.0, beta = 0.6, gamma = 0.02;
     const score = alpha * sumInd + beta * meanPairs - gamma * (20 - diversity);
     return score;
@@ -808,24 +679,23 @@
     const qtd = Math.max(1, Math.min(50, parseInt(qtdApostasInput.value) || 5));
     const k = Math.max(1, parseInt(tamanhoApostaInput.value) || cfgAtual.defaultSize);
     const N = cfgAtual.max;
+    // prepare weights (use ultimoScores as base) e garantir todos positivos
     const base = ultimoScores.map((s,i)=>({ num: i+1, w: Math.max(0.00001, s) }));
-    const candidates = [];
-    const tries = Math.max(200, qtd * 200);
+    // generate candidates unique
+    const candidatesMap = new Map();
+    const tries = Math.max(200, qtd * 150); // ajuste para performance
     for (let t=0;t<tries;t++){
       const comb = sampleWithoutReplacementWeighted(base, k);
       const key = comb.join(',');
+      if (candidatesMap.has(key)) continue;
       const sc = calcularScoreComb(comb);
-      candidates.push({ comb, score: sc, key });
+      candidatesMap.set(key, { comb, score: sc });
     }
-    const map = new Map();
-    candidates.sort((a,b)=>b.score - a.score);
-    for (const c of candidates) {
-      if (map.size >= qtd) break;
-      if (!map.has(c.key)) map.set(c.key, c);
-    }
-    const top = Array.from(map.values()).slice(0,qtd);
+    // pick top qtd
+    const arr = Array.from(candidatesMap.values()).sort((a,b)=>b.score - a.score).slice(0,qtd);
+    // render top
     combinacoesDiv.innerHTML = '';
-    top.forEach((t,i) => {
+    arr.forEach((t,i) => {
       const div = document.createElement('div');
       div.className = 'jogo';
       div.innerHTML = `<div><b>Jogo ${i+1}</b> &nbsp; ${t.comb.map(d=>`<span class="dezena">${String(d).padStart(2,'0')}</span>`).join(' ')}</div>
@@ -845,13 +715,16 @@
         return `<tr><td>${s.concurso}</td><td>${s.data}</td><td>${str}</td></tr>`;
       }).join('') + `</table>`;
     tabelaResultados.innerHTML = html;
+    // highlight on chart by modifying array of colors
     if (chartInstance) {
-      chartInstance.data.datasets[0].backgroundColor = chartInstance.data.labels.map((lab,i)=> comb.includes(i+1) ? '#ff5722' : '#2196f3');
+      const labels = chartInstance.data.labels;
+      chartInstance.data.datasets[0].backgroundColor = labels.map((lab,i)=> comb.includes(i+1) ? '#ff5722' : '#2196f3');
       chartInstance.update();
       setTimeout(()=> {
-        chartInstance.data.datasets[0].backgroundColor = '#2196f3';
+        // restore original single-color array
+        chartInstance.data.datasets[0].backgroundColor = chartInstance.data.labels.map(_=> '#2196f3');
         chartInstance.update();
-        renderResultados(ultimosSorteios);
+        renderResultados(ultimosSorteios); // restore tabela
       }, 6000);
     }
   }
@@ -861,11 +734,14 @@
    *************************************************************************/
   function exportConcursosCSV() {
     if (!ultimosSorteios.length) { alert('Nada a exportar'); return; }
+    // escape CSV fields
     let csv = 'concurso,data,dezenas\n';
     ultimosSorteios.forEach(s => {
-      csv += `${s.concurso},"${s.data}","${s.dezenas.join(' ')}"\n`;
+      const dataEsc = (''+s.data).replace(/"/g,'""');
+      const dezEsc = (''+s.dezenas.join(' ')).replace(/"/g,'""');
+      csv += `${s.concurso},"${dataEsc}","${dezEsc}"\n`;
     });
-    downloadText(csv, `${cfgAtual.api}_concursos_${Date.now()}.csv`);
+    downloadText(csv, `${cfgAtual.api}_concursos_${(new Date()).toISOString().replace(/[:.]/g,'-')}.csv`);
   }
 
   function exportCombCSV() {
@@ -875,9 +751,9 @@
     nodes.forEach((n,i) => {
       const dez = Array.from(n.querySelectorAll('.dezena')).map(s => s.innerText).join(' ');
       const score = n.querySelector('.small')?.innerText.replace('score: ','') || '';
-      csv += `${i+1},"${dez}",${score}\n`;
+      csv += `${i+1},"${dez.replace(/"/g,'""')}",${score}\n`;
     });
-    downloadText(csv, `${cfgAtual.api}_combinacoes_${Date.now()}.csv`);
+    downloadText(csv, `${cfgAtual.api}_combinacoes_${(new Date()).toISOString().replace(/[:.]/g,'-')}.csv`);
   }
 
   function downloadText(text, filename) {
@@ -889,36 +765,6 @@
   }
 
   /*************************************************************************
-   *  Mobile nav interactions
-   *************************************************************************/
-  function openMobileNav(){
-    mobileNav.classList.add('open');
-    mobileNav.setAttribute('aria-hidden','false');
-    hamburgerBtn.setAttribute('aria-expanded','true');
-  }
-  function closeMobileNav(){
-    mobileNav.classList.remove('open');
-    mobileNav.setAttribute('aria-hidden','true');
-    hamburgerBtn.setAttribute('aria-expanded','false');
-  }
-  hamburgerBtn.addEventListener('click', ()=>{
-    const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-    if (expanded) closeMobileNav(); else openMobileNav();
-  });
-  closeNav.addEventListener('click', closeMobileNav);
-  // close when click on a link and navigate to section
-  mobileNav.querySelectorAll('a').forEach(a=>{
-    a.addEventListener('click', (ev)=>{
-      closeMobileNav();
-      const t = a.getAttribute('data-target');
-      const el = document.getElementById(t);
-      if (el) setTimeout(()=> el.scrollIntoView({behavior:'smooth',block:'start'}), 250);
-    });
-  });
-  // close on Escape
-  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeMobileNav(); });
-
-  /*************************************************************************
    *  Inicialização
    *************************************************************************/
   (async () => {
@@ -926,62 +772,20 @@
     tamanhoApostaInput.value = cfgAtual.defaultSize;
     await atualizarCacheStatus();
     if ('serviceWorker' in navigator) {
-      try { navigator.serviceWorker.register('service-worker.js'); } catch(e){console.warn('SW reg fail',e);}    }
+      try { navigator.serviceWorker.register('service-worker.js').catch(()=>{}); } catch(e){/* ignore */ }
+    }
+    // try to load last N by default
     try { await carregarIntervalo(); } catch(e) { console.warn('preload fail', e); }
   })();
-
-  // Registro do Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(function(registration) {
-        console.log('ServiceWorker registrado com sucesso: ', registration.scope);
-        
-        // Verifica se há uma nova versão disponível
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          console.log('Nova versão do Service Worker encontrada!');
-          
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Nova versão disponível, mostrar notificação para atualizar
-              if (confirm('Nova versão disponível! Deseja atualizar?')) {
-                newWorker.postMessage({ type: 'SKIP_WAITING' });
-                window.location.reload();
-              }
-            }
-          });
-        });
-      })
-      .catch(function(error) {
-        console.log('Falha no registro do ServiceWorker: ', error);
-      });
-  });
-
-  // Ouvinte para atualizações
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      refreshing = true;
-      window.location.reload();
-    }
-  });
-}
-
-// Função para verificar se o app está instalado
-function checkPWAInstall() {
-  const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
-                     window.navigator.standalone ||
-                     document.referrer.includes('android-app://');
-  
-  if (isInstalled) {
-    console.log('App executando como PWA instalado');
-  }
-}
-
-// Verifica na carga inicial
-checkPWAInstall();
 
   </script>
 </body>
 </html>
+"""
+
+path = "/mnt/data/Analise_JB_Loto.html"
+with open(path, "w", encoding="utf-8") as f:
+    f.write(html)
+
+print(path)
+
