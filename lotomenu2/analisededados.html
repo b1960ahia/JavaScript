@@ -7,57 +7,56 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2196f3">
   <!-- PWA Meta Tags -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="JB Loto">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="msapplication-TileColor" content="#2196f3">
-<meta name="msapplication-TileImage" content="/icon-144x144.png">
-<meta name="msapplication-config" content="/browserconfig.xml">
-<meta name="application-name" content="JB Loto">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="JB Loto">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="msapplication-TileColor" content="#2196f3">
+  <meta name="msapplication-TileImage" content="/JavaScript/LotoMenu/icon-192.png">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <meta name="application-name" content="JB Loto">
 
-<!-- Apple Touch Icons -->
-<!-- CORRIGIDO -->
-<link rel="apple-touch-icon" href="/JavaScript/LotoMenu/icon-192.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/JavaScript/LotoMenu/icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/JavaScript/LotoMenu/icon-192.png">
-<link rel="apple-touch-icon" sizes="167x167" href="/JavaScript/LotoMenu/icon-192.png">
+  <!-- Apple Touch Icons - CORRIGIDOS -->
+  <link rel="apple-touch-icon" href="/JavaScript/LotoMenu/icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/JavaScript/LotoMenu/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/JavaScript/LotoMenu/icon-192.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="/JavaScript/LotoMenu/icon-192.png">
 
-<!-- E também no manifest (já corrigido acima) -->
-
-<!-- Splash Screens (opcional) -->
-<link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-<link rel="apple-touch-startup-image" href="/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-<link rel="apple-touch-startup-image" href="/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  <!-- Splash Screens (opcional) -->
+  <link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  
   <style>
     /* (mantive seu CSS, pequenos ajustes visuais) */
     /* Estilos específicos para PWA */
-.pwa-mode body {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
+    .pwa-mode body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
 
-/* Melhorar visualização em mobile quando instalado */
-@media (display-mode: standalone) {
-  body {
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  
-  .container {
-    max-width: 100%;
-    margin: 0 auto;
-  }
-}
+    /* Melhorar visualização em mobile quando instalado */
+    @media (display-mode: standalone) {
+      body {
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+    }
 
-/* Prevenir zoom em inputs em iOS */
-@media (max-width: 768px) {
-  input, select, textarea {
-    font-size: 16px !important;
-  }
-}
+    /* Prevenir zoom em inputs em iOS */
+    @media (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
+    
     body { font-family: Arial, sans-serif; margin: 16px; background:#fbfbfd; color:#111; }
     .container { max-width:1200px; margin:0 auto; }
     h1 { margin-bottom:8px; }
@@ -86,6 +85,30 @@
     #heatmap { width:100%; overflow:auto; }
     pre { background:#f7f7f8; padding:10px; border-radius:6px; overflow:auto; }
     input[type=number].small-num { width:80px; padding:6px; }
+    
+    /* Estilos para os botões de gerar ícones */
+    .icon-generator-btn {
+      position: fixed;
+      z-index: 1000;
+      padding: 10px;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    #btnGerarIcones {
+      bottom: 10px;
+      right: 10px;
+      background: #ff5722;
+    }
+    
+    #btnGerarIconesProf {
+      bottom: 50px;
+      right: 10px;
+      background: #4caf50;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -98,9 +121,9 @@
         <label>Loteria:
           <select id="tipoLoteria">
             <option value="lotofacil">Lotofácil</option>
-            <option value="megasena" selected>Mega-Sena</option>
-            <option value="quina">Quina</option>
-            <option value="lotomania">Lotomania</option>
+    <option value="megasena" selected>Mega-Sena</option>
+    <option value="quina">Quina</option>
+    <option value="lotomania">Lotomania</option>
           </select>
         </label>
         <label>Concurso Início: <input id="concursoInicio" type="number" min="1" class="small-num"></label>
@@ -165,6 +188,10 @@
     </div>
 
   </div>
+
+  <!-- Botões para gerar ícones (visíveis apenas durante desenvolvimento) -->
+  <button id="btnGerarIcones" class="icon-generator-btn">🎨 Gerar Ícones PNG</button>
+  <button id="btnGerarIconesProf" class="icon-generator-btn">⭐ Gerar Ícones Profissionais</button>
 
   <script>
   /*************************************************************************
@@ -992,6 +1019,114 @@
   }
 
   /*************************************************************************
+   *  Gerador de Ícones PNG
+   *************************************************************************/
+  function criarIconesPWA() {
+    // Tamanhos necessários para PWA
+    const tamanhos = [192, 512];
+    
+    tamanhos.forEach(tamanho => {
+      const canvas = document.createElement('canvas');
+      canvas.width = tamanho;
+      canvas.height = tamanho;
+      const ctx = canvas.getContext('2d');
+      
+      // Fundo - você pode personalizar a cor
+      ctx.fillStyle = '#2196f3'; // Azul do tema
+      ctx.fillRect(0, 0, tamanho, tamanho);
+      
+      // Texto
+      ctx.fillStyle = '#ffffff'; // Texto branco
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Ajustar tamanho da fonte baseado no tamanho do ícone
+      const fontSize = tamanho === 192 ? 24 : 48;
+      ctx.font = `bold ${fontSize}px Arial`;
+      
+      // Texto principal
+      ctx.fillText('Análise', tamanho / 2, tamanho / 2 - (fontSize * 0.8));
+      ctx.fillText('JB', tamanho / 2, tamanho / 2);
+      ctx.fillText('Loto', tamanho / 2, tamanho / 2 + (fontSize * 0.8));
+      
+      // Converter para PNG e fazer download
+      const dataURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `icon-${tamanho}.png`;
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+    
+    alert('Ícones gerados! Faça o download e substitua os arquivos na pasta.');
+  }
+
+  function criarIconesProfissionais() {
+    const tamanhos = [192, 512];
+    
+    tamanhos.forEach(tamanho => {
+      const canvas = document.createElement('canvas');
+      canvas.width = tamanho;
+      canvas.height = tamanho;
+      const ctx = canvas.getContext('2d');
+      
+      // Gradiente de fundo
+      const gradient = ctx.createLinearGradient(0, 0, tamanho, tamanho);
+      gradient.addColorStop(0, '#2196f3');
+      gradient.addColorStop(1, '#1976d2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, tamanho, tamanho);
+      
+      // Borda branca
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = tamanho * 0.02;
+      ctx.strokeRect(tamanho * 0.1, tamanho * 0.1, tamanho * 0.8, tamanho * 0.8);
+      
+      // Texto com sombra
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const fontSize = tamanho === 192 ? 20 : 42;
+      ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+      
+      // Sombra do texto
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      
+      // Texto centralizado
+      const linhas = ['Análise', 'JB', 'Loto'];
+      const espacamento = fontSize * 1.2;
+      const inicioY = (tamanho - (espacamento * (linhas.length - 1))) / 2;
+      
+      linhas.forEach((linha, index) => {
+        ctx.fillText(linha, tamanho / 2, inicioY + (espacamento * index));
+      });
+      
+      // Remover sombra para próximos desenhos
+      ctx.shadowColor = 'transparent';
+      
+      // Converter e fazer download
+      const dataURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `icon-${tamanho}.png`;
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+    
+    alert('Ícones profissionais gerados! Faça o download e substitua os arquivos.');
+  }
+
+  // Event listeners para os botões de gerar ícones
+  document.getElementById('btnGerarIcones').addEventListener('click', criarIconesPWA);
+  document.getElementById('btnGerarIconesProf').addEventListener('click', criarIconesProfissionais);
+
+  /*************************************************************************
    *  Inicialização
    *************************************************************************/
   (async () => {
@@ -1005,11 +1140,12 @@
   })();
 
   </script>
+  
   <script>
 // Registro do Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register('/JavaScript/LotoMenu/service-worker.js')
       .then(function(registration) {
         console.log('ServiceWorker registrado com sucesso: ', registration.scope);
         
@@ -1056,6 +1192,5 @@ if (isRunningStandalone()) {
   console.log('Executando como PWA');
 }
 </script>
-
 </body>
 </html>
