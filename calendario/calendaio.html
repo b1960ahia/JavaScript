@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário 2026 - Casa da Ração AMIGO FIEL</title>
+    <style>
+        /* ESTILOS OTIMIZADOS PARA PDF */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0.5cm;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                background: white !important;
+            }
+            
+            .a4-container {
+                width: 100% !important;
+                height: 100% !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .a4-container {
+            width: 21cm;
+            height: 29.7cm;
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c7744, #4a9c5f);
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            background-color: #f8e4b7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            border: 2px solid white;
+        }
+        
+        .logo-inner {
+            width: 45px;
+            height: 45px;
+            background-color: #e67e22;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .header-text {
+            flex: 1;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .slogan {
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 3px;
+        }
+        
+        .brands {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 5px;
+            background-color: #f0f7f0;
+            border-bottom: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        
+        .brand-item {
+            text-align: center;
+            font-weight: bold;
+            color: #2c7744;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            background-color: #e8f4e8;
+        }
+        
+        .services {
+            display: flex;
+            justify-content: space-around;
+            padding: 6px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        
+        .service-item {
+            text-align: center;
+            font-weight: bold;
+            color: #e67e22;
+            font-size: 12px;
+        }
+        
+        .calendar-title {
+            text-align: center;
+            padding: 8px;
+            background: linear-gradient(to right, #f8e4b7, #f9d78b);
+            font-size: 16px;
+            font-weight: bold;
+            color: #5a3921;
+            flex-shrink: 0;
+            border-bottom: 1px solid #e67e22;
+        }
+        
+        .calendar-container {
+            flex: 1;
+            overflow: hidden;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+            height: 100%;
+        }
+        
+        .month {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        .month-name {
+            text-align: center;
+            background: linear-gradient(to right, #4a9c5f, #2c7744);
+            color: white;
+            padding: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .days-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: 18px repeat(6, 1fr);
+            gap: 1px;
+            background-color: #e0e0e0;
+            padding: 1px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 2px;
+            background-color: #f5f5f5;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .day {
+            text-align: center;
+            padding: 2px;
+            background-color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .weekend {
+            background-color: #f9f9f9;
+            color: #e67e22;
+            font-weight: bold;
+        }
+        
+        .other-month {
+            color: #aaa;
+            background-color: #f9f9f9;
+        }
+        
+        .holiday {
+            background-color: #fff9e6;
+            color: #d35400;
+            font-weight: bold;
+        }
+        
+        .pet-icon {
+            position: absolute;
+            bottom: 0px;
+            right: 1px;
+            font-size: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 6px;
+            background: linear-gradient(135deg, #2c7744, #4a9c5f);
+            font-size: 10px;
+            color: white;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        
+        .contact-info {
+            margin-top: 3px;
+            font-size: 9px;
+        }
+        
+        .holiday-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            background-color: #f0f7f0;
+            font-size: 10px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 8px;
+        }
+        
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 1px;
+            margin-right: 4px;
+        }
+        
+        .holiday-color {
+            background-color: #fff9e6;
+            border: 1px solid #f1c40f;
+        }
+        
+        .print-instructions {
+            text-align: center;
+            padding: 10px;
+            background: #f8e4b7;
+            margin: 10px auto;
+            max-width: 21cm;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="print-instructions no-print">
+        <h3>Para gerar PDF:</h3>
+        <p>1. Clique com o botão direito → Imprimir</p>
+        <p>2. Escolha "Salvar como PDF" como destino</p>
+        <p>3. Ajuste as margens para "Mínimo" ou "Nenhuma"</p>
+        <p>4. Clique em Salvar</p>
+    </div>
+
+    <div class="a4-container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">
+                    <div class="logo-inner">AMIGO<br>FIEL</div>
+                </div>
+                <div class="header-text">
+                    <h1>CASA DA RAÇÃO AMIGO FIEL</h1>
+                    <p>TUDO PARA O SEU PET COM QUALIDADE E CARINHO</p>
+                    <div class="slogan">Pitimbu - Onde os pets são família!</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="brands">
+            <div class="brand-item">RAÇÃO PREMIUM</div>
+            <div class="brand-item">BRINQUEDOS</div>
+            <div class="brand-item">ACESSÓRIOS</div>
+        </div>
+        
+        <div class="services">
+            <div class="service-item">BANHO & TOSA</div>
+            <div class="service-item">CONSULTAS</div>
+            <div class="service-item">ENTREGA</div>
+        </div>
+        
+        <div class="calendar-title">CALENDÁRIO 2026 - SEU PET AGRADECE!</div>
+        
+        <div class="calendar-container">
+            <div class="calendar-grid" id="calendar-container">
+                <!-- Os meses serão gerados via JavaScript -->
+            </div>
+        </div>
+        
+        <div class="holiday-legend">
+            <div class="legend-item">
+                <div class="legend-color holiday-color"></div>
+                <span>Feriados Nacionais</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Casa da Ração AMIGO FIEL &copy; 2026 - Pitimbu/PB
+            <div class="contact-info">Tel: (83) 99999-9999 | Rua dos Animais, 123 - Centro</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarContainer = document.getElementById('calendar-container');
+            const monthNames = [
+                "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
+                "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
+            ];
+            
+            const dayNames = ["D", "S", "T", "Q", "Q", "S", "S"];
+            
+            // Feriados nacionais fixos do Brasil em 2026
+            const feriados2026 = [
+                { day: 1, month: 0, name: "Ano Novo" },
+                { day: 24, month: 1, name: "Carnaval" },
+                { day: 25, month: 1, name: "Carnaval" },
+                { day: 3, month: 3, name: "Sexta-feira Santa" },
+                { day: 21, month: 3, name: "Tiradentes" },
+                { day: 1, month: 4, name: "Dia do Trabalho" },
+                { day: 11, month: 5, name: "Corpus Christi" },
+                { day: 7, month: 8, name: "Independência" },
+                { day: 12, month: 9, name: "Nossa Senhora Aparecida" },
+                { day: 2, month: 10, name: "Finados" },
+                { day: 15, month: 10, name: "Proclamação da República" },
+                { day: 25, month: 11, name: "Natal" }
+            ];
+            
+            // Criar calendário para cada mês de 2026
+            for (let month = 0; month < 12; month++) {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'month';
+                
+                const monthNameDiv = document.createElement('div');
+                monthNameDiv.className = 'month-name';
+                monthNameDiv.textContent = monthNames[month];
+                monthDiv.appendChild(monthNameDiv);
+                
+                const daysGrid = document.createElement('div');
+                daysGrid.className = 'days-grid';
+                
+                // Adicionar cabeçalhos dos dias da semana
+                for (let day of dayNames) {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.textContent = day;
+                    daysGrid.appendChild(dayHeader);
+                }
+                
+                // Obter primeiro dia do mês e último dia
+                const firstDay = new Date(2026, month, 1);
+                const lastDay = new Date(2026, month + 1, 0);
+                
+                // Dias do mês anterior (se necessário)
+                const startingDayOfWeek = firstDay.getDay();
+                const prevMonthLastDay = new Date(2026, month, 0).getDate();
+                
+                for (let i = 0; i < startingDayOfWeek; i++) {
+                    const day = document.createElement('div');
+                    day.className = 'day other-month';
+                    day.textContent = prevMonthLastDay - startingDayOfWeek + i + 1;
+                    daysGrid.appendChild(day);
+                }
+                
+                // Dias do mês atual
+                for (let i = 1; i <= lastDay.getDate(); i++) {
+                    const day = document.createElement('div');
+                    
+                    // Verificar se é fim de semana
+                    const currentDate = new Date(2026, month, i);
+                    if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+                        day.classList.add('weekend');
+                    }
+                    
+                    // Verificar se é feriado
+                    const isHoliday = feriados2026.some(feriado => 
+                        feriado.day === i && feriado.month === month
+                    );
+                    
+                    if (isHoliday) {
+                        day.classList.add('holiday');
+                        day.innerHTML = i + '<span class="pet-icon">🐾</span>';
+                    } else {
+                        day.textContent = i;
+                    }
+                    
+                    day.className += ' day';
+                    daysGrid.appendChild(day);
+                }
+                
+                // Dias do próximo mês (se necessário)
+                const totalCells = 42;
+                const remainingCells = totalCells - (startingDayOfWeek + lastDay.getDate());
+                
+                for (let i = 1; i <= remainingCells; i++) {
+                    const day = document.createElement('div');
+                    day.className = 'day other-month';
+                    day.textContent = i;
+                    daysGrid.appendChild(day);
+                }
+                
+                monthDiv.appendChild(daysGrid);
+                calendarContainer.appendChild(monthDiv);
+            }
+        });
+    </script>
+</body>
+</html>
