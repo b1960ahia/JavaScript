@@ -38,7 +38,7 @@
         }
         
         body {
-            background-color: #f0f0f0;
+            background-color: white;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -57,12 +57,12 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #2c7744, #4a9c5f);
+            background: linear-gradient(135deg, #093116, #4bb0b8);
             color: white;
-            padding: 12px 15px;
+            padding: 35px 20px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: space-evenly;
             flex-shrink: 0;
         }
         
@@ -72,28 +72,28 @@
         }
         
         .logo {
-            width: 60px;
-            height: 60px;
-            background-color: #f8e4b7;
+            width: 90px;
+            height: 90px;
+            background-color: #cea851;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 12px;
-            border: 2px solid white;
+            border: 1px solid rgb(6, 49, 12);
         }
         
         .logo-inner {
-            width: 45px;
-            height: 45px;
-            background-color: #e67e22;
+            width: 60px;
+            height: 60px;
+            background-color: #eb4513;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 15px;
             text-align: center;
             line-height: 1.2;
         }
@@ -103,27 +103,30 @@
         }
         
         .header h1 {
-            font-size: 20px;
+            text-align: center;
+            font-size: 33px;
             margin-bottom: 3px;
             letter-spacing: 0.5px;
         }
         
         .header p {
-            font-size: 14px;
+            text-align: center;
+            font-size: 16px;
             font-weight: bold;
         }
         
         .slogan {
-            font-size: 12px;
+            text-align: center;
+            font-size: 18px;
             font-style: italic;
-            margin-top: 3px;
+            margin-top: 4px;
         }
         
         .brands {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-evenly;
             padding: 8px 5px;
-            background-color: #f0f7f0;
+            background-color: #073b07;
             border-bottom: 1px solid #ddd;
             flex-shrink: 0;
         }
@@ -131,18 +134,18 @@
         .brand-item {
             text-align: center;
             font-weight: bold;
-            color: #2c7744;
-            font-size: 12px;
-            padding: 4px 8px;
+            color: #e90b0b;
+            font-size: 18px;
+            padding: 2px 8px;
             border-radius: 3px;
             background-color: #e8f4e8;
         }
         
         .services {
             display: flex;
-            justify-content: space-around;
-            padding: 6px;
-            background-color: #f9f9f9;
+            justify-content: space-evenly;
+            padding: 8px;
+            background-color: #063f06;
             border-bottom: 1px solid #ddd;
             flex-shrink: 0;
         }
@@ -150,17 +153,17 @@
         .service-item {
             text-align: center;
             font-weight: bold;
-            color: #e67e22;
-            font-size: 12px;
+            color: white;
+            font-size: 18px;
         }
         
         .calendar-title {
             text-align: center;
             padding: 8px;
-            background: linear-gradient(to right, #f8e4b7, #f9d78b);
-            font-size: 16px;
+            background-color: rgb(131, 12, 12);
+            font-size: 23px;
             font-weight: bold;
-            color: #5a3921;
+            color: white;
             flex-shrink: 0;
             border-bottom: 1px solid #e67e22;
         }
@@ -169,14 +172,14 @@
             flex: 1;
             overflow: hidden;
             padding: 10px;
-            background-color: #f9f9f9;
+            background-color: #33a16e44;
         }
         
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: 10px;
+            gap: 2px;
             height: 100%;
         }
         
@@ -195,25 +198,25 @@
             color: white;
             padding: 4px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 15px;
         }
         
         .days-grid {
             flex: 1;
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            grid-template-rows: 18px repeat(6, 1fr);
+            grid-template-columns: repeat(7, 2fr);
+            grid-template-rows: 12px repeat(6, 2fr);
             gap: 1px;
             background-color: #e0e0e0;
-            padding: 1px;
+            padding: 3px;
         }
         
         .day-header {
             text-align: center;
             font-weight: bold;
-            padding: 2px;
+            padding: 3px;
             background-color: #f5f5f5;
-            font-size: 9px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -224,7 +227,7 @@
             padding: 2px;
             font-weight: bolder;
             background-color: white;
-            font-size: 15px;
+            font-size: 17px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -244,7 +247,7 @@
         
         .holiday {
             background-color: #9cafd84b;
-            color: #d35400;
+            color: #e6630b;
             font-weight: bold;
         }
         
@@ -253,30 +256,34 @@
             bottom: 0px;
             right: 1px;
             font-size: 8px;
-        }
+        }        
         
         .footer {
             text-align: center;
-            padding: 6px;
-            background: linear-gradient(135deg, #2c7744, #4a9c5f);
-            font-size: 10px;
+            padding: 4px;
+            background-color: rgb(131, 12, 12);;
+            font-size: 15px;
+            font-weight: bolder;
             color: white;
             border-top: 1px solid #ddd;
             flex-shrink: 0;
         }
         
         .contact-info {
-            margin-top: 3px;
-            font-size: 9px;
+            margin-top: 5px;
+            font-size: 11px;
+            font-weight: bold;
         }
         
         .holiday-legend {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 5px;
-            background-color: #f0f7f0;
-            font-size: 12px;
+            padding: px;
+            color: black;
+            font-weight: bold;
+            background-color: #dfe6df;
+            font-size: 15px;
             border-top: 1px solid #ddd;
         }
         
@@ -295,7 +302,7 @@
         
         .holiday-color {
             background-color: #5d82cf81;
-            border: 1px solid #f1c40f;
+            border: 1px solid #0f0d03;
         }
         
         .print-instructions {
@@ -370,16 +377,18 @@
             // Feriados nacionais fixos do Brasil em 2026
             const feriados2026 = [
                 { day: 1, month: 0, name: "Ano Novo" },
-                { day: 24, month: 1, name: "Carnaval" },
-                { day: 25, month: 1, name: "Carnaval" },
+                { day: 17, month: 1, name: "Carnaval" },
+                { day: 18, month: 1, name: "Carnaval" },
+                { day: 8, month: 2, name: "Dia da Mulher"},
                 { day: 3, month: 3, name: "Sexta-feira Santa" },
                 { day: 21, month: 3, name: "Tiradentes" },
                 { day: 1, month: 4, name: "Dia do Trabalho" },
-                { day: 11, month: 5, name: "Corpus Christi" },
+                { day: 4, month: 5, name: "Corpus Christi" },
                 { day: 7, month: 8, name: "Independência" },
                 { day: 12, month: 9, name: "Nossa Senhora Aparecida" },
                 { day: 2, month: 10, name: "Finados" },
                 { day: 15, month: 10, name: "Proclamação da República" },
+                { day: 20, month: 10, name: "Consciência Negra" },
                 { day: 25, month: 11, name: "Natal" }
             ];
             
